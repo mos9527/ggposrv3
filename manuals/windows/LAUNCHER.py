@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*-
 import sys
 
 HOST_OFFSET = 0x32152
 HOST_LENGTH = 0x12
 
 def prase_uri(uri):    
-    '''formatting : mosclub://[spectate,match],[romname],[host]:[port]@quark-........-........'''
-    assert uri[:10] == 'mosclub://','URI protocol not supported'
-    action,quark = uri[10:].split('@')
+    '''formatting : moscade://[spectate,match],[romname],[host]:[port]@quark-........-......../'''
+    assert uri[:10] == 'moscade://','URI protocol not supported'
+    action,quark = uri[10:-1].split('@')
     action,rom,server   = action.split(',')
     host,port = server.split(':')
     return action,rom,quark,host,port
@@ -25,9 +26,10 @@ def patch_ggponet_dll(f,host):
     return True
 
 if __name__ == '__main__':
-    uri = sys.argv[-1]
-    try:
-        action,rom,quark,host,port = prase_uri(uri)            
+    uri = sys.argv[-1]    
+    try:        
+        action,rom,quark,host,port = prase_uri(uri)           
+        assert action and rom and quark and host and port # cant miss!        
         args = ''
         if action == 'spectate':
             # sscanf(connect, "quark:stream,%[^,],%[^,],%d", game, quarkid, &remotePort);            
@@ -37,5 +39,9 @@ if __name__ == '__main__':
             args = 'quark:served,%s,%s,%s,0,1' % (rom,quark,port)            
         print('> Running',args)                    
         assert args,'Invalid action'
-    except AssertionError as e:
-        print('! Bad URI : %s' % e)
+    except Exception as e:
+        if uri != 'moscade://test/':
+            input('- Invalid URI : %s' % e)
+        else:
+            print('- moscade:// Handler installed!')
+            input('- You may now close this window.')

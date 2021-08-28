@@ -3,3 +3,4 @@ quarks/
 .vscode
 __pycache__
 *test*
+*.reg

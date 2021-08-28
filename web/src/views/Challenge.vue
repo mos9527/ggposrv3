@@ -125,10 +125,10 @@ export default {
       var channel = this.getChannelObject(this.channel_current)
       var url = `${channel.rom},${this.ggpo_host}:${this.ggpo_port}@${this.quark}`
       if (this.opponent) /* We're in a match */        
-        url = `mosclub://match,${url}`
+        url = `moscade://match,${url}`
       if (this.spectating) /* We're spectating */      
-        url = `mosclub://spectate,${url}`
-      console.log('[CHALLENGE] Opening MOSCLUB URI',url)
+        url = `moscade://spectate,${url}`
+      console.log('[CHALLENGE] Opening MOSCADE URI',url)
       window.open(url)
     },
     log(level, msg , islink=false) {
