@@ -1,0 +1,22 @@
+*::-webkit-scrollbar { display: none; } /*hides scrollbar*/
+.chat {
+  background: transparent;
+  transition: all linear 0.5s;
+}
+.chat-emphasize-1 {
+  background:linear-gradient(to right,rgba(0,0,0,0) 95%,red)
+}
+.chat-emphasize-2 {
+  background:linear-gradient(to right,rgba(0,0,0,0) 95%,green)
+}
+.log-view {
+  font-family: monospace;
+  overflow: scroll;
+}
+.status-active {
+  font-weight: bolder;
+  color: green;
+}
+.status-dead {
+  color : red;
+}
