@@ -405,7 +405,7 @@ class Client(WebsocketSession):
     # endregion
 
     def __repr__(self):
-        return f'{self.username if self.username else "???"}@{self.channel.name if self.channel else "???"}'
+        return f'{self.username if self.username else "???"}@{self.channel.name if self.channel else "???"}{","+self.quark if self.quark else ""}'
     
     def __bool__(self):
         return True

@@ -132,7 +132,7 @@ class GGPOPlayer(StreamRequestHandler):
 		if not self.quark: raise Exception("Trying to fetch client whilst outside a match")		
 		for client_ in client_handler.server.get_clients_by_quark(self.quark):
 			client_ : Client
-			if client_.quark == self.quark:				
+			if client_.quark == self.quark:
 				return client_ # ts and ident are the same			
 			if client_.username == self.username:
 				return client_ # quark could been deleted beforehand, use usernames as a fallback
