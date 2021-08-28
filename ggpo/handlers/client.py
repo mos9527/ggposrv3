@@ -426,11 +426,11 @@ def setup_routing():
 
     @server.route('/.*')
     def static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./client/dist/'+request.path,mime_type='')
+        return WriteContentToRequest(request,'./web/dist/'+request.path,mime_type='')
 
     @server.route('/')
     def index(initator, request: Request, content):
-        return WriteContentToRequest(request,'./client/dist/'+'index.html',mime_type='text/html; charset=UTF-8')
+        return WriteContentToRequest(request,'./web/dist/'+'index.html',mime_type='text/html; charset=UTF-8')
 
     @server.route('/port')
     @JSONMessageWrapper(read=False)
