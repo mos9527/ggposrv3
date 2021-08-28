@@ -19,5 +19,5 @@ class GGPOChannel:
 def get_default_channels(evt : EventThread):
     return ({
         'lobby' : GGPOChannel(evt,"lobby",desc="大厅"),
-        'jjbahftf': GGPOChannel(evt,"jojoban", "jojobanr1",desc="ジョジョの奇妙な冒険 未来への遺産 - JOJO的奇妙冒险 未来遗产", chunksize=496),    
+        'jjbahftf': GGPOChannel(evt,"jjbahftf", "jojobanr1",desc="ジョジョの奇妙な冒険 未来への遺産 - JOJO的奇妙冒险 未来遗产", chunksize=496),    
     })

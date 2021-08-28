@@ -106,8 +106,9 @@
             class="font-weight-bold"
             v-if="selectedUserStatus.status=='AVAILABLE'"
             :to="'/challenge?challenging=' + selectedUser"
+            :disabled="channel_current=='lobby'"
           >
-            挑战
+            {{ channel_current=='lobby' ?  '大厅内无法挑战' : '挑战' }}
           </v-btn>
           <v-btn
             style="width: 50%"
@@ -291,6 +292,7 @@ export default {
   },
   computed: {
     ...mapGetters([      
+      "channel_current",
       "channel_users",
       "username",
       "connected",

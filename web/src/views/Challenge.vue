@@ -30,19 +30,21 @@
         <v-chip class="mx-2 text-none"> {{ user }} </v-chip>
       </v-slide-item>
     </v-slide-group>      
-      <!-- Player status -->
+      <!-- Player status -->      
       <v-divider class="mt-0"></v-divider>
     </v-container>
     <v-container class="log-view pt-0">
       <div
         v-for="log in logs"
-        :key="log.ts"
+        :key="log.id"
         :style="'color:' + logColors[log.level]"
       >
-        [{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}
+        <div v-if="!log.islink" >[{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}</div>
+        <div v-if="log.islink" > 
+           <v-btn style="width:100%;height:48px" color="primary" v-on:click="launchPrecursor($event)"> JOIN GAME </v-btn>
+        </div>
       </div>
       <div style="display:flex"><v-text-field placeholder="公屏消息" v-model="chatMessage" @keydown.enter="(e) => { if (e.ctrlKey) send() }"></v-text-field>
-      <v-btn v-on:click="send" icon> <v-icon>mdi-send</v-icon> 发送 </v-btn>
       </div>
     </v-container>
     <!-- Log box -->
@@ -50,7 +52,8 @@
       <v-container>
         <v-btn
           v-if="!canceled"
-          class="pr-4 red"
+          class="pr-4"
+          color="error"
           style="width: 100%"
           v-on:click="cancel_challenge"
           >取消挑战</v-btn
@@ -95,10 +98,12 @@ export default {
   props: ["challenging", "challenger","spectating"],
   data: () => ({
     logs: [],
+    logId:0,
     logColors: { D: "blue", I: "green", E: "red" },
 
     chatMessage : undefined,
 
+    quark : undefined,
     spectators : [],
     player1Status: {},
     player2Status: {},
@@ -110,8 +115,24 @@ export default {
     Utils: Utils,
   }),
   methods: {
-    log(level, msg) {
-      this.logs.push({ ts: new Date().getTime(), level: level, msg: msg });
+    getChannelObject(channel){
+      for (var chn of this.channels)
+        if (chn.name==channel) return chn
+    },
+    launchPrecursor(e){
+      console.log(this.channels)
+      e.currentTarget.classList.remove('primary')
+      var channel = this.getChannelObject(this.channel_current)
+      var url = `${channel.rom},${this.ggpo_host}:${this.ggpo_port}@${this.quark}`
+      if (this.opponent) /* We're in a match */        
+        url = `mosclub://match,${url}`
+      if (this.spectating) /* We're spectating */      
+        url = `mosclub://spectate,${url}`
+      console.log('[CHALLENGE] Opening MOSCLUB URI',url)
+      window.open(url)
+    },
+    log(level, msg , islink=false) {
+      this.logs.push({ id:this.logId++, ts: new Date().getTime() , level: level, msg: msg ,islink:islink});
     },
     send(){
       this.$store.dispatch(CHAT_CHANNEL_L, this.chatMessage).then(() => {
@@ -155,10 +176,7 @@ export default {
       /* accept current challenge */
       this.log("D", `接受 ${this.opponent} 的挑战`);
       this.$store
-        .dispatch(ACCEPT_CHALLENGE_L, this.opponent)
-        .then(() => {
-          this.log("I", "挑战已接受！");
-        })
+        .dispatch(ACCEPT_CHALLENGE_L, this.opponent)        
         .catch((e) => {
           this.log("E", `接受失败：${e}`);
           this.canceled = true;
@@ -172,7 +190,9 @@ export default {
             this.spectators = action.payload
           }
           if ( action.type == WATCH_CHALLENGE ) {
+            this.quark = action.payload.quark
             this.log("I",`观战 QUARK: ${action.payload.quark}`)
+            this.log("I",this.quark,true) 
           }
           if ( action.type == CHAT_CHANNEL || action.type == INGAME_CHAT ){
             this.log("I",`[${action.type == CHAT_CHANNEL ? '公屏' : '游戏内'}] ${action.payload.username} : ${action.payload.message}`)
@@ -189,8 +209,9 @@ export default {
             this.canceled = true;
           }
           if (action.type == ACCEPT_CHALLENGE) {
-            this.quark = action.payload;
-            this.log("I", `比赛 QUARK:${this.quark}`);
+            this.quark = action.payload;            
+            this.log("I", `比赛 QUARK:${this.quark}`);            
+            this.log("I",this.quark,true)            
           }
           if (action.type == STATUS) {
             if (this.player1Status)
@@ -218,8 +239,11 @@ export default {
     ...mapGetters([
       "channel_current",
       "channel_users",
+      "channels",
       "username",
       "connected",
+      "ggpo_host",
+      "ggpo_port"
     ]),
     opponent() {
       return this.challenging ? this.challenging : this.challenger;

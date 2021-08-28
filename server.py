@@ -10,10 +10,13 @@ if __name__ == '__main__':
     argparse.add_argument('--client-port',help='HTTP/Websocket interface port',default=8000)
     args = argparse.parse_args()
     
+    ggpo_address = ('0.0.0.0',args.ggpo_port)
+    client_address = ('0.0.0.0',args.client_port)
+
     from ggpo.handlers import player
-    thread_player = Thread(target=player.run,daemon=True,args=('0.0.0.0',args.ggpo_port))
+    thread_player = Thread(target=player.run,daemon=True,args=(client_address,ggpo_address))
     from ggpo.handlers import client
-    thread_client = Thread(target=client.run,daemon=True,args=('0.0.0.0',args.client_port))
+    thread_client = Thread(target=client.run,daemon=True,args=(client_address,ggpo_address))
     thread_player.start()
     thread_client.start()
     print(f'''============================== SERVER IS UP

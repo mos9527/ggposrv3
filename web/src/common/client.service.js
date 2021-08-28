@@ -65,6 +65,7 @@ const Client = {
     Client.onCodeUpdate = callback
     Client.reply(WATCH_CHALLENGE,username)
   },       
+  url_ref_port : ENDPOINT + '/port',
   url_list_channel : ENDPOINT + '/channels',
   url_list_users : ENDPOINT + '/channels/users?channel=',
   url_chat_history : ENDPOINT + '/channels/chathistory?channel=',

@@ -48,7 +48,7 @@ def quark_same_ts(lhs,rhs):
 
 def allocate_quark(ts):
 	'''generates a unique quark with differnet identity but same ts'''
-	return f'mosclub-{generate_new_ts()}-{ts}'
+	return f'quark-{generate_new_ts()}-{ts}'
 
 def _create_file(fn):
 	os.makedirs(os.path.dirname(fn),exist_ok=True)

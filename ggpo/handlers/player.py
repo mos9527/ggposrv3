@@ -12,7 +12,6 @@ from ggpo.models.quark import GGPOQuark, QuarkStorage, allocate_quark_file, get_
 from ggpo.models.exceptions import GGPOError
 from ggpo.handlers import client as client_handler,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
 from ggpo.handlers.client import Client
-from ggpo.utils import db
 
 import traceback
 
@@ -32,6 +31,7 @@ class GGPOServer(ThreadingMixIn, TCPServer):
 		self._players = ThreadsafeList()
 		self._quarks = QuarkStorage()
 		self.holepunch = False
+		self.client_address = ('',0)
 		self.logger = getLogger('GGPOServer')		
 
 	def bind_and_active(self,address_tuple):
@@ -480,6 +480,7 @@ class GGPOPlayer(StreamRequestHandler):
 		return self.username == o.username
 
 server = GGPOServer()
-def run(*address_tuple):
-	server.bind_and_active(address_tuple)
+def run(client_address,ggpo_address):
+	server.client_address = client_address
+	server.bind_and_active(ggpo_address)
 	return server.run()

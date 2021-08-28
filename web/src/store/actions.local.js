@@ -19,6 +19,7 @@ export const GAMEBUFFER = "L_GAMEBUFFER"
 export const SPECTATE = "L_SPECTATE"
 export const ERRORMSG = "L_ERRORMSG"
 
+export const REFRESH_PORT = "L_REFRESH_PORT"
 export const REFRESH_CHANNEL = "L_REFRESH_CHANNEL"
 export const REFRESH_USERS   = "L_REFRESH_USERS"
 export const REFRESH_HISTROY = "L_REFRESH_HISTROY"

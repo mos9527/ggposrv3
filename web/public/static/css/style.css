@@ -20,3 +20,15 @@
 .status-dead {
   color : red;
 }
+.overlay {
+  display: block;
+  position: fixed;
+  width: 100vw; 
+  height: 100vh; 
+  background-color: rgba(0, 0, 0, 0.85);
+  color: rgb(232, 232, 232);
+  font-size: 5em;
+  text-align: center;
+  padding: 2rem;   
+  user-select: none;
+}

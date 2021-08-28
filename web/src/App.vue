@@ -23,6 +23,9 @@
         <router-view></router-view>
       </v-container>
     </v-main>
+    <div class="overlay" v-if="!connected">
+      {{ connected == undefined ? '连接中' : '连接失败'}}
+    </div>
   </v-app>
 </template>
 
@@ -34,7 +37,8 @@ export default {
   computed: {
     // mix the getters into computed with object spread operator
     ...mapGetters([
-      "authenticated"
+      "authenticated",
+      "connected"
       // ...
     ]),
   },

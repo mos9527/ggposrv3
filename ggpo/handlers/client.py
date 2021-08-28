@@ -1,3 +1,4 @@
+import ggpo
 from os import path
 from enum import Enum
 from json import dumps,loads
@@ -77,7 +78,8 @@ class ClientServer(PyWebHost):
         replied = 0         
         for client in to if isinstance(to,list) else to.values():
             client : Client
-            replied += client.reply(command,payload)
+            try: replied += client.reply(command,payload)
+            except: pass
         return replied    
 
     def on_user_new(self,client):
@@ -99,6 +101,7 @@ class ClientServer(PyWebHost):
         self._clients = EventDict(self.events,ServerEvents.USER_NEW,ServerEvents.USER_LEFT)
         self._channels = get_default_channels(self.events)
         self.logger = getLogger('ClientServer')        
+        self.ggpo_address = ('',0)
         # Registering events
         self.events.register(ServerEvents.USER_NEW,lambda n:self.on_user_new(n))
         self.events.register(ServerEvents.USER_LEFT,lambda n:self.on_user_left(n))
@@ -113,6 +116,7 @@ class Client(WebsocketSession):
         self.logger.log(level, header+msg, *args)
 
     def reply(self, command : GGPOCommand, payload):           
+        if not self.keep_alive: return
         if command == GGPOCommand.ERRORMSG and payload != GGPOClientErrorcodes.SUCCESS:
             self.log('%s - %s', command.name, payload.name, level=WARNING) 
         # prints log when something goes wrong       
@@ -123,7 +127,7 @@ class Client(WebsocketSession):
             self.send(WebsocketFrame(PAYLOAD_LENGTH=len(payload), PAYLOAD=payload))
         except Exception as e:
             self.log('Failed to send frame! Marking connection as finished - %s',e,level=ERROR)
-            if not self.keep_alive:self.close()
+            self.keep_alive = False
             return False
         return True
 
@@ -428,6 +432,13 @@ def setup_routing():
     def index(initator, request: Request, content):
         return WriteContentToRequest(request,'./client/dist/'+'index.html',mime_type='text/html; charset=UTF-8')
 
+    @server.route('/port')
+    @JSONMessageWrapper(read=False)
+    @allow_cors
+    def port(initator, request: Request, content):
+        request.send_response(200)
+        return {'host':server.ggpo_address[0],'port':server.ggpo_address[1]}
+
     @server.route('/ws')
     @WebsocketSessionWrapper()
     def websocket(initator, request: Request, content):
@@ -464,8 +475,9 @@ def setup_routing():
 
 server = ClientServer()
 
-def run(*address_tuple):    
+def run(client_address,ggpo_address): 
     getLogger('PyWebHost').setLevel(ERROR)
-    server.bind_and_active(address_tuple) and setup_routing()    
+    server.ggpo_address = ggpo_address
+    server.bind_and_active(client_address) and setup_routing()    
     server.logger.info('Client Server started http://%s:%s' % server.server_address)
     return server.serve_forever()
