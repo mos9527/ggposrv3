@@ -29,7 +29,7 @@ const actions = {
             })
             
         } else {
-            console.log('[CONNECTION] Connection failed!')
+            console.log('[CONNECTION] DISCONNECTED')
             state.connected = false
         }
     },

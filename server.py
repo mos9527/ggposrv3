@@ -19,7 +19,6 @@ if __name__ == '__main__':
     thread_client = Thread(target=client.run,daemon=True,args=(client_address,ggpo_address))
     thread_player.start()
     thread_client.start()
-    print(f'''============================== SERVER IS UP
-- 客户端 ：http://127.0.0.1:{args.client_port}''')
+    print(f'''WebUI : http://127.0.0.1:{args.client_port}''')
     while thread_client.is_alive() and thread_player.is_alive():
         time.sleep(0.1) # otherwise MainThread takes up a lot of cycles for literally nothing :/

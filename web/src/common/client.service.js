@@ -7,12 +7,16 @@ const Client = {
     this.ws = new WebSocket( ENDPOINT.replace('https://','ws://').replace('http://','ws://') + '/ws')
     this.ws.onmessage = this.onWsMessage
     this.ws.onopen  = this.onWsOpen
+    this.ws.onclose = this.onWsClose
     this.onCodeUpdate = undefined
     console.log('[API] Service initialized')
   },
   reply(command,payload){
     var data = JSON.stringify({type:command,data:payload})
     return this.ws.send(data)
+  },
+  onWsClose(){
+    store.dispatch(CONNECT,false)
   },
   onWsOpen() {
     store.dispatch(CONNECT,Client.ws ? Client.ws.readyState : false)
