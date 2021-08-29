@@ -30,7 +30,7 @@ def uuid_md5():
 	while True:
 		rand='%s%f%d'%(time.time_ns(),random.random(),seed)
 		hash_ = hashlib.md5(rand.encode())
-		yield base64.b64encode(hash_.digest()).decode()
+		yield base64.b64encode(hash_.digest(),b'?#').decode()
 		seed+=1
 uuid = uuid_md5()
 

@@ -11,6 +11,7 @@ def prase_uri(uri):
     action,quark = uri[10:].split('@')
     action,rom,server   = action.split(',')
     host,port = server.split(':')
+    quark = quark.replace('/','')
     return action,rom,quark,host,port
 
 def patch_ggponet_dll(host,f='fbneo/ggponet.dll'):

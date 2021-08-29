@@ -20,7 +20,7 @@ class GGPOServer(ThreadingMixIn, TCPServer):
 	daemon_threads = True  
 	@property
 	def players(self):
-		'''Current players LIST, not indexed'''
+		'''Current players LIST, spectators dont live here'''
 		return self._players
 	@property
 	def quarks(self):
@@ -96,9 +96,10 @@ class GGPOPlayer(StreamRequestHandler):
 	def listen_port(self):
 		return self.server.server_address[1]
 
-	def send(self,msg:Union[str,bytes]):
+	def send(self,msg:Union[str,bytes]):		
 		if type(msg) == str : msg = msg.encode()
-		self.wfile.write(msg)
+		try:self.wfile.write(msg)
+		except:self.finish()
 
 	def recv(self,s=16384):
 		return self.request.recv(s)
@@ -414,6 +415,8 @@ class GGPOPlayer(StreamRequestHandler):
 		'''
 		Handling spectator leaving, and updating views
 		'''		
+		if not self.server.quarks.hasquark(quark):
+			return # quark is already gone
 		quarkobject = self.server.quarks[quark]
 		quarkobject.spectators.pop(self.username)		
 		response=self.make_reply(GGPOSequence.SPEC_VIEWS,self.pad2hex(len(quarkobject.spectators)+1))
@@ -443,16 +446,14 @@ class GGPOPlayer(StreamRequestHandler):
 			with self.server.quarks as quarks:
 				if quarks.hasquark(self.quark):
 					quarkobject = quarks[self.quark]
-					# terminate our peer's connection if they're still up			
-					if quarkobject.p1==self and self.quark and not quarkobject.p2.closing:
-						self.log('... Closing connection %s',quarkobject.p2)
-						quarkobject.p2.send(b'\xff\xff\x00\x00\xde\xad')
-						quarkobject.p2.request.close()
-					if quarkobject.p2==self and self.quark and not quarkobject.p1.closing:
-						self.log('... Closing connection %s',quarkobject.p1)
-						quarkobject.p1.send(b'\xff\xff\x00\x00\xde\xad')
-						quarkobject.p1.request.close()								
-					quarks.pop(self.quark) # the quark is gone			
+					# terminate our peer's connection if they're still up,including spectators
+					for player in list(quarkobject.spectators.values())+[quarkobject.p1,quarkobject.p2]:
+						if player!=self and not player.closing:
+							self.log('... Closing connection %s',quarkobject.p2)
+							player.send(b'\xff\xff\x00\x00\xde\xad')
+							player.request.close()	
+					self.log('... Removing quark %s',self.quark)						
+					quarks.pop(self.quark) # the quark is gone								
 				# Notify the client(s),which will then revert the states
 			self.client.onEmulatorDisconnect(self)
 
