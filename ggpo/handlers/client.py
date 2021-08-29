@@ -497,6 +497,7 @@ def setup_routing():
 server = ClientServer()
 
 def run(client_address,ggpo_address): 
+    getLogger('Request').setLevel(ERROR)
     getLogger('PyWebHost').setLevel(ERROR)
     server.ggpo_address = ggpo_address
     server.bind_and_active(client_address) and setup_routing()    
