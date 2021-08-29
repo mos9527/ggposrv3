@@ -1,4 +1,4 @@
-ggposrv3 - GGPO server on Python 3
+ggposrv3 - 现代化的 GGPO 服务器
 ==================================
 # 进度
 - ## 服务端

@@ -1,6 +1,13 @@
 ## 在 Windows 上使用
 目前进度已允许项目在局域网环境下部署并使用。
 
+### 客户端安装 (Windows)
+0. 客户端需要有 Python 3.6 环境
+1. 在 [windows](https://github.com/greats3an/ggposrv3/tree/master/manuals/windows) 目录下载所有文件到同一文件夹
+2. 运行 `INSTALL.py`
+3. <kbd>Windows</kbd> + <kbd>R</kbd> 运行，输入 `moscade://browse`
+4. 将 Fightcade 的 FBNeo 放入该文件夹
+
 ### 局域网环境的部署
 0. 环境需 Python 3.6+
 1. 安装依赖 (又是[自己造的轮子](https://github.com/greats3an/pywebhost))
@@ -24,4 +31,3 @@
         - 8000 : Web 服务器
     
     运行 `python sever.py` 即可
-
