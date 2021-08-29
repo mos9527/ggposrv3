@@ -4,8 +4,7 @@
       <v-form
         @submit.prevent="onSubmit(username, password)"
         lazy-validation
-        ref="form"
-        v-model="valid"
+        ref="form"        
       >
         <v-text-field
           class="form-control"
@@ -26,6 +25,7 @@
           >登陆</v-btn
         >
       </v-form>
+      <v-container style="color:red">{{errormessage}}</v-container>
     </div>
   </div>
 </template>
@@ -34,15 +34,19 @@
 import { AUTH } from "../store/actions.local";
 export default {
   name: "Login",
-  data: () => ({
-    valid: true,
+  data: () => ({    
     username: '',
     password: '',
+    errormessage : ''
   }),
   methods: {
     onSubmit(username, password) {
       this.$store.dispatch(AUTH, { username, password }).then(() => {
         this.$router.push("/channels");
+      }).catch(code=>{
+        this.username = ''
+        this.password = ''
+        this.errormessage = `登陆失败：${code}`
       });
     },
   },

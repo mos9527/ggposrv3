@@ -87,7 +87,10 @@ class GGPOPlayer(StreamRequestHandler):
 	def log(self,msg,*args,level=DEBUG):
 		header = '\033[1m<%s> \033[0m' % self
 		self.logger.log(level,header+msg,*args)
-
+	@property
+	def ascii_username(self):
+		'''ASCII character only username,pads unrenderable-chars with ?'''
+		return ''.join([char if ord(char) < 127 else '?' for char in self.username][:60])
 	@property 
 	def now(self):
 		return datetime.today().strftime("%Y-%m-%d %H:%M:%S")
@@ -258,12 +261,12 @@ class GGPOPlayer(StreamRequestHandler):
 		peer  = self.server.get_peer_player_by_quark(quark)		
 
 		pdu=self.sizepad(peer.quark)
-		pdu+=self.sizepad(self.username)
+		pdu+=self.sizepad(self.ascii_username)
 		pdu+=self.sizepad(msg)		
 		peer.send(self.make_reply(GGPOSequence.INGAME_PRIVMSG,pdu))
 		self.client.server.get_client_by_username(peer.username).onIngameChat(self.client.username,msg)
 		pdu=self.sizepad(quark)
-		pdu+=self.sizepad(self.username)
+		pdu+=self.sizepad(self.ascii_username)
 		pdu+=self.sizepad(msg)	
 		self.send(self.make_reply(GGPOSequence.INGAME_PRIVMSG,pdu))
 		self.client.server.get_client_by_username(self.username).onIngameChat(self.client.username,msg)
@@ -309,8 +312,8 @@ class GGPOPlayer(StreamRequestHandler):
 			sleep(1)
 		pdu=self.pad2hex(0)
 		if (i<self.PEER_TIMEOUT-1):
-			pdu+=self.sizepad(quarkobject.p1.username)
-			pdu+=self.sizepad(quarkobject.p2.username)
+			pdu+=self.sizepad(quarkobject.p1.safe_username)
+			pdu+=self.sizepad(quarkobject.p2.safe_username)
 		else:
 			# avoid crashing fba if we can't get our peer - sending null usernames
 			pdu+=self.pad2hex(0)

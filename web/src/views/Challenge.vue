@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pa-0" flex style="overflow: hidden">
+  <v-container class="pa-0" flex>
     <v-container app v-if="player1Status || player2Status" color="transparent" inset>
       <v-container style="display:flex;flex-direction:column">
         <div v-if="canceled" class="overlay on-element">
@@ -56,7 +56,8 @@
       <div
         v-for="log in logs"
         :key="log.id"
-        :style="'color:' + logColors[log.level]"
+        :color="logColors[log.level]"
+        class="log-message"
       >
         <div v-if="!log.islink" >[{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}</div>
         <div v-if="log.islink && !canceled" > 
@@ -68,7 +69,7 @@
             </v-btn>
         </div>
       </div>
-      <div style="display:flex"><v-text-field placeholder="公屏消息" v-model="chatMessage" @keydown.enter="(e) => { if (e.ctrlKey) send() }"></v-text-field>
+      <div style="display:flex"><v-text-field :placeholder="opponent ? '私信' : '公屏' + ' Ctrl+Enter'" v-model="chatMessage" @keydown.enter="(e) => { if (e.ctrlKey) send(opponent) }"></v-text-field>
       </div>
     </v-container>
     <!-- Log box -->
@@ -103,6 +104,7 @@ import {
   SEND_CHALLENGE as SEND_CHALLENGE_L,
   WATCH_CHALLENGE as WATCH_CHALLENGE_L,
   CHAT_CHANNEL as CHAT_CHANNEL_L,
+  PRIVMSG as PRIVMSG_L,
 } from "../store/actions.local";
 import Utils from "../common/utils";
 import {
@@ -139,6 +141,11 @@ export default {
     Utils: Utils,
   }),
   methods: {
+    scrollToLast() {
+      var chats = this.$el.getElementsByClassName("log-message");
+      var last = chats[chats.length - 1];
+      if (last) last.scrollIntoView({ behavior: "smooth" });
+    },    
     getIsReadyForSpectating(){      
       return (this.player1Status && this.player2Status) && (this.player1Status.emulator && this.player2Status.emulator)
     },
@@ -160,12 +167,28 @@ export default {
     },
     log(level, msg , islink=false) {
       this.logs.push({ id:this.logId++, ts: new Date().getTime() , level: level, msg: msg ,islink:islink});
+      setTimeout(this.scrollToLast,100);
     },
-    send(){
+    send(isPM){
+      if (isPM){
+        this.$store
+          .dispatch(PRIVMSG_L, {
+            username: this.opponent,
+            message: this.chatMessage,
+          })
+          .then(() => {
+            console.log("[CHAT] PM Sent:", this.chatMessage);
+            this.chatMessage = "";
+          })
+          .catch((code) => {
+            this.showError(`发送失败：${code}`);
+          });        
+      } else {      
       this.$store.dispatch(CHAT_CHANNEL_L, this.chatMessage).then(() => {
-          console.log("[CHAT] Sent:", this.chatMessage);
+          console.log("[CHAT] Channel chat:", this.chatMessage);
           this.chatMessage = "";
         });
+      }
     },
     spectate(){
       this.log('I',`观战 ${this.spectating} 的比赛`)

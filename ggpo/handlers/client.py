@@ -244,12 +244,15 @@ class Client(WebsocketSession):
         '''step 1 of creating a conenction. authenticate and join the club'''
         username,password = str(payload['username']),str(payload['password'])
         # auth success!
-        self.username = username        
-        self.server.clients[username] = self    
-        self.set_current_channel(self.server.default_channel.name)
-        self.log('LOGIN : OK w/password %s',password,level=INFO)
-        return self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.SUCCESS)
-
+        if not username in self.server.clients:            
+            self.username = username        
+            self.server.clients[username] = self    
+            self.set_current_channel(self.server.default_channel.name)
+            self.log('LOGIN : OK w/password %s',password,level=INFO)
+            return self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.SUCCESS)
+        else:
+            self.log('LOGIN : Duped w/password %s',password,level=WARN)
+            return self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.USER_INVALID)
     # region Challenging
     def reset_match(self):
         if self.opponent: # Resets status for both of us if this was in a match

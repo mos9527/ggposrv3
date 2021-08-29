@@ -10,6 +10,7 @@
           rounded
           :disabled="user.name == username"
           v-on:click="userMenu"
+          :username="user.name"
         >
           <!-- Dont challenge / PM yourself -->
           {{ user.name }}
@@ -191,9 +192,10 @@ export default {
       this.showErrorDialog = true;
     },
     userMenu(e) {
-      this.selectedUser = e.target.innerText
-      for(var user of this.channel_users){        
-        if (user.name==this.selectedUser) {
+      console.log(e)
+      this.selectedUser = e.currentTarget.getAttribute('username')
+      for(var user of this.channel_users){ 
+        if (user.name==this.selectedUser) {          
           this.selectedUserStatus = user
           break
         }

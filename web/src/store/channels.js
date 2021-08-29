@@ -1,5 +1,5 @@
 import { JOIN_CHANNEL , PART_CHANNEL } from "./actions.remote"
-import { JOIN_CHANNEL as L_JOIN_CHANNEL, REFRESH_CHANNEL, REFRESH_USERS } from "./actions.local"
+import { JOIN_CHANNEL as L_JOIN_CHANNEL, REFRESH_CHANNELS, REFRESH_USERS } from "./actions.local"
 import { SUCCESS } from "./errcode"
 import Client from '../common/client.service'
 import store from "."
@@ -32,14 +32,15 @@ const actions = {
     [JOIN_CHANNEL](context, payload) {             
         console.log('[CHANNEL] Client joined:',payload.username,payload.channel)
         state.channel_current = payload.channel // this means we're there too
-        context.dispatch(REFRESH_CHANNEL); // refreshes everytime someone joins,including ourselves
+        context.dispatch(REFRESH_CHANNELS); // refreshes everytime someone joins,including ourselves
         context.dispatch(REFRESH_USERS);
     },   
     [PART_CHANNEL](context, payload) {        
         console.log('[CHANNEL] Client left:',payload.username,payload.channel)
         if (payload.username != store.getters.username) context.dispatch(REFRESH_USERS); 
+        context.dispatch(REFRESH_CHANNELS);
     },      
-    [REFRESH_CHANNEL]() {
+    [REFRESH_CHANNELS]() {
         console.log('[CHANNEL] Refreshing list.')
         return fetch(Client.url_list_channel)
             .then(r=>r.json())
