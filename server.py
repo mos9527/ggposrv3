@@ -1,7 +1,7 @@
-from logging import info, warn
+from logging import info, warning
 from threading import Thread
 from argparse import ArgumentParser
-import time,socket,sys,multiprocessing
+import time,socket,sys
 try:
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname).1s] %(name)s %(message)s'
@@ -50,7 +50,8 @@ How to access:
         info('Player server shutdown...')
         player.server.shutdown()
         info('...done...Client server shutdown...')
+        from pywebhost import __version__        
         if not client.server.shutdown():
-            warn('Shutting down forcibly')        
+            warning('Shutting down forcibly')        
         info('... All done , going home...')
         sys.exit(0)
