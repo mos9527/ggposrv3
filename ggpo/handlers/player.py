@@ -11,7 +11,6 @@ from socketserver import TCPServer, ThreadingMixIn
 from ggpo.models.quark import GGPOQuark, QuarkStorage, allocate_quark_file, get_quark_file, quark_same_ts, ts_from_quark
 from ggpo.models.exceptions import GGPOError
 from ggpo.handlers import client as client_handler,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
-from ggpo.handlers.client import Client
 
 import traceback
 
@@ -131,8 +130,7 @@ class GGPOPlayer(StreamRequestHandler):
 	def client(self):
 		'''Returns a GGPOClient object representing our *own* client connection, or self if not found'''
 		if not self.quark: raise Exception("Trying to fetch client whilst outside a match")		
-		for client_ in client_handler.server.get_clients_by_quark(self.quark):
-			client_ : Client
+		for client_ in client_handler.server.get_clients_by_quark(self.quark):			
 			if client_.quark == self.quark:
 				return client_ # ts and ident are the same			
 			if client_.username == self.username:
