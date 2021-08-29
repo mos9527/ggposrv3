@@ -60,7 +60,12 @@
       >
         <div v-if="!log.islink" >[{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}</div>
         <div v-if="log.islink && !canceled" > 
-           <v-btn style="width:100%;height:48px" color="primary" v-on:click="launchPrecursor($event)"> JOIN GAME </v-btn>
+           <v-btn 
+              style="width:100%;height:48px" :key="statusUpdateKey"
+              :disabled="spectating && !getIsReadyForSpectating()" 
+              color="primary" v-on:click="launchPrecursor($event)">
+                {{spectating && !getIsReadyForSpectating() ? '等待玩家加入' : '加入游戏'}}
+            </v-btn>
         </div>
       </div>
       <div style="display:flex"><v-text-field placeholder="公屏消息" v-model="chatMessage" @keydown.enter="(e) => { if (e.ctrlKey) send() }"></v-text-field>
@@ -70,7 +75,7 @@
     <v-footer app color="transparent" inset>
       <v-container>
         <v-btn
-          v-if="!canceled"
+          v-if="!canceled && !this.spectating"
           class="pr-4"
           color="error"
           style="width: 100%"
@@ -134,6 +139,9 @@ export default {
     Utils: Utils,
   }),
   methods: {
+    getIsReadyForSpectating(){      
+      return (this.player1Status && this.player2Status) && (this.player1Status.emulator && this.player2Status.emulator)
+    },
     getChannelObject(channel){
       for (var chn of this.channels)
         if (chn.name==channel) return chn
@@ -212,6 +220,7 @@ export default {
             this.quark = action.payload.quark
             this.log("I",`观战 QUARK: ${action.payload.quark}`)
             this.log("I",this.quark,true) 
+            this.statusUpdateKey += 1;
           }
           if ( action.type == CHAT_CHANNEL || action.type == INGAME_CHAT ){
             this.log("I",`[${action.type == CHAT_CHANNEL ? '公屏' : '游戏内'}] ${action.payload.username} : ${action.payload.message}`)
@@ -229,12 +238,14 @@ export default {
               this.log("E","原因：观战客户端已退出，请重新进入观战")
             else
               this.log("E",`原因：${action.type}`)
-            this.canceled = true;
+            this.canceled = true
+            this.statusUpdateKey += 1;
           }
           if (action.type == ACCEPT_CHALLENGE) {
             this.quark = action.payload;            
             this.log("I", `比赛 QUARK:${this.quark}`);            
-            this.log("I",this.quark,true)            
+            this.log("I",this.quark,true)     
+            this.statusUpdateKey += 1       
           }
           if (action.type == STATUS) {
             if (this.player1Status)
