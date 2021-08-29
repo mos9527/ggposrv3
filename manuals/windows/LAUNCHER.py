@@ -51,8 +51,7 @@ if __name__ == '__main__':
             try: patch_ggponet_dll(host=host)
             except: pass
             cmd = r'start fbneo/fcadefbneo.exe ' + params
-            os.system(cmd)
-            input(cmd)
+            os.system(cmd)            
             sys.exit(0)
     except Exception as e:
         if uri != 'moscade://test/':
