@@ -446,7 +446,7 @@ class GGPOPlayer(StreamRequestHandler):
 					quarkobject = quarks[self.quark]
 					# terminate our peer's connection if they're still up,including spectators
 					for player in list(quarkobject.spectators.values())+[quarkobject.p1,quarkobject.p2]:
-						if player!=self and not player.closing:
+						if player and player!=self and not player.closing: # p1 / p2 may have not connected yet
 							self.log('... Closing connection %s',quarkobject.p2)
 							player.send(b'\xff\xff\x00\x00\xde\xad')
 							player.request.close()	
