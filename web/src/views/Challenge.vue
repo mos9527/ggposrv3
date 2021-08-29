@@ -2,14 +2,25 @@
   <v-container class="pa-0" flex style="overflow: hidden">
     <v-container app v-if="player1Status || player2Status" color="transparent" inset>
       <v-container style="display:flex;flex-direction:column">
+        <div v-if="canceled" class="overlay on-element">
+          挑战已失效
+        </div>
         <v-container v-if="player1Status" class="mb-0 pa-0">
           <p style="float:left">
             <b>P<sub>1</sub></b>：{{ player1Status.username }}
           </p>
           <p style="float:right">
-            <strong class="pr-2" :class="player1Status.emulator ? 'status-active' : 'status-dead'"><v-icon>mdi-switch</v-icon> EMU</strong>            
-            <strong class="pr-2" :class="player1Status.status=='PLAYING' ? 'status-active' : ''"><v-icon>mdi-state-machine</v-icon>{{ player1Status.status }}</strong>
-            <strong class="pr-2"><v-icon>mdi-account</v-icon>{{ player1Status.side }}</strong>
+            <strong class="pr-2">
+              <v-icon :color="player1Status.emulator ? 'green' : 'red'">mdi-switch</v-icon>
+            </strong>            
+            <strong class="pr-2">
+              <v-icon :color="player1Status.status=='PLAYING' ? 'green' : 'red'">mdi-state-machine</v-icon>
+              {{ player1Status.status }}
+            </strong>
+            <strong class="pr-2">
+              <v-icon :color="player1Status.side=='P1' ? 'green' : 'red'">mdi-account</v-icon>
+              {{ player1Status.side }}
+            </strong>
           </p>
         </v-container>
 
@@ -18,9 +29,17 @@
             <b>P<sub>2</sub></b>：{{ player2Status.username }}
           </p>
           <p style="float:right">
-            <strong class="pr-2" :class="player2Status.emulator ? 'status-active' : 'status-dead'"><v-icon>mdi-switch</v-icon> EMU</strong>            
-            <strong class="pr-2" :class="player2Status.status=='PLAYING' ? 'status-active' : ''"><v-icon>mdi-state-machine</v-icon>{{ player2Status.status }}</strong>
-            <strong class="pr-2"><v-icon>mdi-account</v-icon>{{ player2Status.side }}</strong>
+            <strong class="pr-2">
+              <v-icon :color="player2Status.emulator ? 'green' : 'red'">mdi-switch</v-icon>
+            </strong>            
+            <strong class="pr-2">
+              <v-icon :color="player2Status.status=='PLAYING' ? 'green' : 'red'">mdi-state-machine</v-icon>
+              {{ player2Status.status }}
+            </strong>
+            <strong class="pr-2">
+              <v-icon :color="player2Status.side=='P2' ? 'green' : 'red'">mdi-account</v-icon>
+              {{ player2Status.side }}
+            </strong>
           </p>
         </v-container>
       </v-container>

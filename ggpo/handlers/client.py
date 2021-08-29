@@ -338,6 +338,12 @@ class Client(WebsocketSession):
         self.opponent = peer    
         # let everyone in the same channel know             
         self.server.boardcast(self.channel.clients,GGPOCommand.NOTIFY_CHALLENGE,self.username)
+        # syncing up status of both clients
+        self.reply(GGPOCommand.STATUS,self.status_report)
+        self.reply(GGPOCommand.STATUS,self.opponent.status_report)
+        self.opponent.reply(GGPOCommand.STATUS,self.opponent.status_report)
+        self.opponent.reply(GGPOCommand.STATUS,self.status_report)            
+            
         self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.SUCCESS)
         self.log('CHALLENGE ACCEPT : Quark TS %s', ts)
     
