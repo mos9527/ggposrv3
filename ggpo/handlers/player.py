@@ -71,7 +71,7 @@ class GGPOPlayer(StreamRequestHandler):
 	def __init__(self, request, client_address, server):
 		self.username = None		# Client's currently registered username
 		self.host = client_address	
-								# Client's hostname / ip.
+								# Client's hostname / ip.for tcpconnection
 		self.clienttype = None	
 							    # Client's type	
 		self.quark = None		# Client's quark (in-game uri)
@@ -356,7 +356,7 @@ class GGPOPlayer(StreamRequestHandler):
 			self.log('GETPEER : couldnt find peer!')
 			return self.finish()			
 		else:
-			self.log('GETPEER : Found peer: %s [my fbaport: %d ; peer fbaport: %d]', peer, self.port, peer.port)											
+			self.log('GETPEER : Found peer: %s [%s:%s <-> %s:%s]', peer, self.host[0],self.port,peer.host[0],peer.port)
 		if self.side==GGPOClientSide.PLAYER1 and quarkobject.p1==None:
 			quarkobject.p1=self			
 		elif self.side==GGPOClientSide.PLAYER2 and quarkobject.p2==None:
