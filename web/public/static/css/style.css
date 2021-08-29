@@ -24,6 +24,7 @@
   text-align: center;
   padding: 2rem;   
   user-select: none;
+  z-index: 99;
 }
 
 .on-element {

@@ -44,10 +44,10 @@ const router = new VueRouter({
 import store from "../store"
 router.beforeEach((to, from, next) => {  
   if (store.getters) {        
-    // if (to.name == '登陆' && store.getters.authenticated) next({ path: '/channels' })        
-    // if (to.name == '频道列表' && !store.getters.authenticated) next({ path: '/login' })    
-    // if (to.name == '频道' && !store.getters.authenticated) next({ path: '/login' })    
-    // if (to.name == '挑战' && !store.getters.authenticated) next({ path: '/login' })    
+    if (to.name == '登陆' && store.getters.authenticated) next({ path: '/channels' })        
+    if (to.name == '频道列表' && !store.getters.authenticated) next({ path: '/login' })    
+    if (to.name == '频道' && !store.getters.authenticated) next({ path: '/login' })    
+    if (to.name == '挑战' && !store.getters.authenticated) next({ path: '/login' })    
     next()
   }
 })
