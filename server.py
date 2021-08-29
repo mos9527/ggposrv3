@@ -1,7 +1,7 @@
-from logging import info
+from logging import info, warning
 from threading import Thread
 from argparse import ArgumentParser
-import time,socket
+import time,socket,sys
 try:
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname).1s] %(name)s %(message)s'
@@ -42,5 +42,16 @@ How to access:
     - Local : http://127.0.0.1:{args.client_port}
     - LAN   : http://{get_ip()}:{args.client_port}
     ''')
-    while thread_client.is_alive() and thread_player.is_alive():
-        time.sleep(0.1) # otherwise MainThread takes up a lot of cycles for literally nothing :/
+    try:
+        while thread_client.is_alive() and thread_player.is_alive():
+            time.sleep(0.1) # otherwise MainThread takes up a lot of cycles for literally nothing :/
+    except:
+        info('Handling exit gracefully')
+        info('Player server shutdown...')
+        player.server.shutdown()
+        info('...done...Client server shutdown...')
+        from pywebhost import __version__        
+        if not client.server.shutdown():
+            warning('Shutting down forcibly')        
+        info('... All done , going home...')
+        sys.exit(0)

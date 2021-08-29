@@ -258,7 +258,7 @@ class Client(WebsocketSession):
             client_inmatch = list(self.server.get_player_client_by_quark(self.quark)) + list(self.server.get_spectator_client_by_quark(self.quark))            
             for client in client_inmatch:
                 player = player_handler.server.get_player_by_username(client.username)
-                player.finish()
+                if player : player.finish() # only when there is a emulator attached
             # Kills the emulators,making both clients' on_disconnect() handled
             # so we don't need to mess with thier states anymore
             # Should this be done by GGPOPlayer already unless it's a client-issued disconenct
