@@ -1,7 +1,7 @@
 ggposrv3 - 现代化的 GGPO 服务器
 ==================================
 # 使用
-见 [manuals](https://github.com/greats3an/ggposrv3/tree/master/manuals)
+见 [使用指南](https://github.com/greats3an/ggposrv3/tree/master/manuals)
 # 进度
 - ## 服务端
 	- ✔ 局域网使用
