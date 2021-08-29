@@ -312,8 +312,8 @@ class GGPOPlayer(StreamRequestHandler):
 			sleep(1)
 		pdu=self.pad2hex(0)
 		if (i<self.PEER_TIMEOUT-1):
-			pdu+=self.sizepad(quarkobject.p1.safe_username)
-			pdu+=self.sizepad(quarkobject.p2.safe_username)
+			pdu+=self.sizepad(quarkobject.p1.ascii_username)
+			pdu+=self.sizepad(quarkobject.p2.ascii_username)
 		else:
 			# avoid crashing fba if we can't get our peer - sending null usernames
 			pdu+=self.pad2hex(0)
