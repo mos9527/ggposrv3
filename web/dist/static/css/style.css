@@ -13,13 +13,6 @@
   font-family: monospace;
   overflow: scroll;
 }
-.status-active {
-  font-weight: bolder;
-  color: green;
-}
-.status-dead {
-  color : red;
-}
 .overlay {
   display: block;
   position: fixed;
@@ -31,4 +24,13 @@
   text-align: center;
   padding: 2rem;   
   user-select: none;
+}
+
+.on-element {
+  position: absolute;
+  top:0;
+  left: 0;    
+  width: 100%;  
+  height: auto;
+  z-index: 100;
 }
