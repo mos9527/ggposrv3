@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from genericpath import isfile
 import sys,os
 
 HOST_OFFSET = 0x32152
@@ -54,8 +53,12 @@ if __name__ == '__main__':
             os.system(cmd)            
             sys.exit(0)
     except Exception as e:
-        if uri != 'moscade://test/':
-            input('- Invalid URI : %s' % e)
+        if uri == 'moscade://install/':
+            from time import sleep
+            print('moscade:// Handler installed successfully.')
+            sleep(2) or sys.exit()
+        elif uri == 'moscade://browse/':
+            os.system('explorer "%s"' % os.path.dirname(__file__))
         else:
-            print('- moscade:// Handler installed!')
-            input('- You may now close this window.')
+            input('- Invalid URI : %s' % e)
+            

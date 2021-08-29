@@ -43,6 +43,6 @@ code = os.system('REGISTER.reg')
 if code!=0:
     print('! 注册失败')
     sys.exit(1)
-else:
-    os.system('start moscade://test')
+else: # ready for tests
+    os.system('start moscade://install')
     sys.exit(0)
