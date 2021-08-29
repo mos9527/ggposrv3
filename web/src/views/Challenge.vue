@@ -59,7 +59,7 @@
         :style="'color:' + logColors[log.level]"
       >
         <div v-if="!log.islink" >[{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}</div>
-        <div v-if="log.islink" > 
+        <div v-if="log.islink && !canceled" > 
            <v-btn style="width:100%;height:48px" color="primary" v-on:click="launchPrecursor($event)"> JOIN GAME </v-btn>
         </div>
       </div>
@@ -224,7 +224,11 @@ export default {
             action.type == PART_CHANNEL ||
             action.type == DECLINE_CHALLENGE
           ) {
-            this.log("E", `挑战已失效：${action.type}`);
+            this.log("E", "挑战已失效");
+            if (this.player1Status.status == 'PLAYING' || this.player2Status.status == 'PLAYING')
+              this.log("E","原因：观战客户端已退出，请重新进入观战")
+            else
+              this.log("E",`原因：${action.type}`)
             this.canceled = true;
           }
           if (action.type == ACCEPT_CHALLENGE) {
