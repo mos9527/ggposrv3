@@ -293,11 +293,15 @@ class Client(WebsocketSession):
             # quit spectation
             self.log('SPECTATE : Quit spectating')
             p1,p2 = self.server.get_p1_p2_client_by_quark(self.quark)
-            if p1:self.reply(GGPOCommand.STATUS,p1.status_report)
-            if p2:self.reply(GGPOCommand.STATUS,p1.status_report)
+            if p1:
+                self.reply(GGPOCommand.STATUS,p1.status_report)
+                self.reply(GGPOCommand.CANCEL_CHALLENGE,p1.username)
+            if p2:
+                self.reply(GGPOCommand.STATUS,p1.status_report)
+                self.reply(GGPOCommand.CANCEL_CHALLENGE,p2.username)
             # update the latest status,we wont be getting any as a spectator
             self.status = GGPOClientStatus.AVAILABLE
-            self.update_spectators()
+            self.update_spectators()            
             self.quark = None
             # update viewers            
 
