@@ -18,7 +18,7 @@
               {{ player1Status.status }}
             </strong>
             <strong class="pr-2">
-              <v-icon :color="player1Status.side=='P1' ? 'green' : 'red'">mdi-account</v-icon>
+              <v-icon :color="player1Status.side=='PLAYER1' ? 'green' : 'red'">mdi-account</v-icon>
               {{ player1Status.side }}
             </strong>
           </p>
@@ -37,7 +37,7 @@
               {{ player2Status.status }}
             </strong>
             <strong class="pr-2">
-              <v-icon :color="player2Status.side=='P2' ? 'green' : 'red'">mdi-account</v-icon>
+              <v-icon :color="player2Status.side=='PLAYER2' ? 'green' : 'red'">mdi-account</v-icon>
               {{ player2Status.side }}
             </strong>
           </p>
