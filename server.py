@@ -1,10 +1,13 @@
 from logging import info
 from threading import Thread
 from argparse import ArgumentParser
-import coloredlogs,time,socket
-coloredlogs.DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname).1s] %(name)s %(message)s'
-coloredlogs.install(level=0)
-
+import time,socket
+try:
+    import coloredlogs
+    coloredlogs.DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname).1s] %(name)s %(message)s'
+    coloredlogs.install(level=0)
+except:
+    print('WARNING: coloredlogs is not installed!')
 def get_ip():
     # https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -29,7 +29,7 @@
 ### 部署（LAN)
 0. 环境需 Python 3.6+
 1. 安装依赖 ([自己造的轮子](https://github.com/greats3an/pywebhost))
-
+    
         pip install pywebhost
 2. 运行 server.py
     参数：
