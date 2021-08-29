@@ -56,7 +56,7 @@
       <div
         v-for="log in logs"
         :key="log.id"
-        :color="logColors[log.level]"
+        style="'color:'+logColors[log.level]"
         class="log-message"
       >
         <div v-if="!log.islink" >[{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}</div>
