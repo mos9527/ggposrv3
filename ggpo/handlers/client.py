@@ -60,15 +60,22 @@ class ClientServer(PyWebHost):
             if quark_same_ts(client.quark, quark):
                 yield client
     
-    def get_spectators_by_quark(self,quark):
+    def get_spectator_client_by_quark(self,quark):
         for client in self.get_clients_by_quark(quark):
             if client.status == GGPOClientStatus.SPECTATING:
                 yield client
     
-    def get_players_by_quark(self,quark):
+    def get_player_client_by_quark(self,quark):
         for client in self.get_clients_by_quark(quark):
             if client.status == GGPOClientStatus.PLAYING:
                 yield client
+
+    def get_p1_p2_client_by_quark(self,quark):
+        p1,p2 = None,None
+        for client in self.get_player_client_by_quark(quark):
+            if client.side == GGPOClientSide.PLAYER1:p1=client
+            if client.side == GGPOClientSide.PLAYER2:p2=client        
+        return p1,p2
 
     def bind_and_active(self,address_tuple):
         super().__init__(address_tuple)
@@ -183,8 +190,8 @@ class Client(WebsocketSession):
         self.reply(GGPOCommand.STATUS,self.status_report)
 
     def update_spectators(self):
-        spectators = list(self.server.get_spectators_by_quark(self.quark))
-        players    = list(self.server.get_players_by_quark(self.quark))
+        spectators = list(self.server.get_spectator_client_by_quark(self.quark))
+        players    = list(self.server.get_player_client_by_quark(self.quark))
         self.server.boardcast(spectators + players,GGPOCommand.SPECTATE,[client.username for client in spectators])
         
     def onReceive(self, frame: bytearray):
@@ -217,7 +224,7 @@ class Client(WebsocketSession):
     
     def onIngameChat(self, username , msg):
         self.reply(GGPOCommand.INGAME_CHAT,{'username':username,'message':msg})
-        for client in self.server.get_spectators_by_quark(self.quark):
+        for client in self.server.get_spectator_client_by_quark(self.quark):
             client.reply(GGPOCommand.INGAME_CHAT,{'username':username,'message':msg})
             
     def onEmulatorConnected(self , player):
@@ -225,7 +232,7 @@ class Client(WebsocketSession):
         self.reply(GGPOCommand.STATUS,self.status_report)
         if self.opponent:
             self.opponent.reply(GGPOCommand.STATUS,self.status_report)
-        for client in self.server.get_spectators_by_quark(self.quark):
+        for client in self.server.get_spectator_client_by_quark(self.quark):
             client.reply(GGPOCommand.STATUS,self.status_report)
 
     def onEmulatorDisconnect(self , player):
@@ -248,12 +255,13 @@ class Client(WebsocketSession):
         if self.opponent: # Resets status for both of us if this was in a match
             self.log('CHALLENGE : Reverting match status , Opponent was:%s',self.opponent)
             self.opponent.opponent = None # Do this only on one side
-            po = player_handler.server.get_player_by_username(self.opponent.username)
-            ps = player_handler.server.get_player_by_username(self.username)
-            if po:po.finish()
-            if ps:ps.finish()
+            client_inmatch = list(self.server.get_player_client_by_quark(self.quark)) + list(self.server.get_spectator_client_by_quark(self.quark))            
+            for client in client_inmatch:
+                player = player_handler.server.get_player_by_username(client.username)
+                player.finish()
             # Kills the emulators,making both clients' on_disconnect() handled
             # so we don't need to mess with thier states anymore
+            # Should this be done by GGPOPlayer already unless it's a client-issued disconenct
             self.status = GGPOClientStatus.AVAILABLE 
             self.opponent.status = GGPOClientStatus.AVAILABLE
             self.side = GGPOClientSide.SPEC_PRESAVE
@@ -263,29 +271,34 @@ class Client(WebsocketSession):
             self.reply(GGPOCommand.STATUS,self.opponent.status_report)
             self.opponent.reply(GGPOCommand.STATUS,self.opponent.status_report)
             self.opponent.reply(GGPOCommand.STATUS,self.status_report)            
-            # syncing up status of both clients            
-            self.server.boardcast(self.channel.clients,GGPOCommand.CANCEL_CHALLENGE,self.username)
-            self.server.boardcast(self.channel.clients,GGPOCommand.CANCEL_CHALLENGE,self.opponent.username)
+            # syncing up status of both players sperately so we dont get repeated message                           
+            self.server.boardcast(client_inmatch,GGPOCommand.CANCEL_CHALLENGE,self.username)
+            self.server.boardcast(client_inmatch,GGPOCommand.CANCEL_CHALLENGE,self.opponent.username)
             # notify everyone in the same channel that the match is no longer available           
-            for client in self.server.get_spectators_by_quark(self.quark):
+            for client in self.server.get_spectator_client_by_quark(self.quark):
                 client.reply(GGPOCommand.STATUS,self.status_report)
                 client.reply(GGPOCommand.STATUS,self.opponent.status_report)                
                 client.quark = None
                 client.status = GGPOClientStatus.AVAILABLE                     
-                self.log('SPECTATE : Reverted for %s',client.username)                
+                self.log('SPECTATE : Reverted for non-watching spectator %s',client.username)                
+            # revert status for spectators that dont have their game launched
             self.quark = ''
             self.opponent.quark = ''
             # reset quark                
             self.opponent = None
             # no longer in a match
-            self.log('CHALLENGE : Reverted match status')
+            self.log('CHALLENGE : Reverted match status for all players / spectators in quark')
             return True
         if self.status == GGPOClientStatus.SPECTATING:
             # quit spectation
             self.log('SPECTATE : Quit spectating')
-            self.quark = None
+            p1,p2 = self.server.get_p1_p2_client_by_quark(self.quark)
+            if p1:self.reply(GGPOCommand.STATUS,p1.status_report)
+            if p2:self.reply(GGPOCommand.STATUS,p1.status_report)
+            # update the latest status,we wont be getting any as a spectator
             self.status = GGPOClientStatus.AVAILABLE
             self.update_spectators()
+            self.quark = None
             # update viewers            
 
     def challenge_send(self, peer_username):
@@ -382,12 +395,10 @@ class Client(WebsocketSession):
             self.side = GGPOClientSide.SPEC_PRESAVE
             self.status = GGPOClientStatus.SPECTATING
             self.quark = allocate_quark(ts) # special quark for us only
-            p1,p2 = None,None
-            for client in self.channel.clients.values():
-                if quark_same_ts(client.quark,peer.quark):
-                    if client.side == GGPOClientSide.PLAYER1:p1=client
-                    if client.side == GGPOClientSide.PLAYER2:p2=client
+            p1,p2 = self.server.get_p1_p2_client_by_quark(self.quark)
             self.reply(GGPOCommand.WATCH_CHALLENGE,{'quark':self.quark,'player1':p1.username,'player2':p2.username})
+            self.reply(GGPOCommand.STATUS,p1.status_report)
+            self.reply(GGPOCommand.STATUS,p2.status_report)                 
             self.update_spectators()
             return self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.SUCCESS)
         return self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.USER_INVALID)
@@ -411,7 +422,7 @@ class Client(WebsocketSession):
     # endregion
 
     def __repr__(self):
-        return f'{self.username if self.username else "???"}@{self.channel.name if self.channel else "???"}'
+        return f'{self.username if self.username else "???"}@{self.channel.name if self.channel else "???"}{","+self.quark if self.quark else ""}'
     
     def __bool__(self):
         return True
