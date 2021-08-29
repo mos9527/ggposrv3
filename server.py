@@ -49,8 +49,7 @@ How to access:
         info('Handling exit gracefully')
         info('Player server shutdown...')
         player.server.shutdown()
-        info('...done...Client server shutdown...')
-        from pywebhost import __version__        
+        info('...done...Client server shutdown...')               
         if not client.server.shutdown():
             warning('Shutting down forcibly')        
         info('... All done , going home...')
