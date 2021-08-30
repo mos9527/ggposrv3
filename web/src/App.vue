@@ -22,7 +22,7 @@
       </v-footer>
     </v-main>
     <div
-      class="overlay1"
+      class="overlay"
       :class="connected == false ? 'overlay-fatal' : ''"
       v-if="!connected"
     >
