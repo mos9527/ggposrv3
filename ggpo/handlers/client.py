@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ggpo
 from os import path
 from enum import Enum
