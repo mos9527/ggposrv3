@@ -4,3 +4,4 @@ quarks/
 __pycache__
 *test*
 *.reg
+*banners*
