@@ -4,7 +4,7 @@
       <v-row v-for="channel in channels" :key="channel.name">
         <v-card style="width:100%;margin-top:1vh" :to="'/channel/?name=' + channel.name">
           <v-img
-            :src="'/static/card/' + channel.name + '.png'"
+            :src="'/static/banners/' + channel.name + '.png'"
             class="subheading white--text"
             gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.8)"
             aspect-ratio="6"

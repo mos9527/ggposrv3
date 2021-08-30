@@ -159,6 +159,7 @@ import {
 } from "../store/actions.local";
 import { CANCEL_CHALLENGE, CHAT_CHANNEL, PART_CHANNEL, PRIVMSG, SEND_CHALLENGE } from "../store/actions.remote";
 import Utils from "../common/utils";
+import { DEVELOPMENT } from "../common/config"
 export default {
   props: ["name"],
   data: () => ({
@@ -185,6 +186,8 @@ export default {
     errorMessage: "",
 
     Utils: Utils,
+
+    'DEVELOPMENT':DEVELOPMENT
   }),
   methods: {    
     getChannelObject(channel){
@@ -251,7 +254,8 @@ export default {
           })
           .catch(() => {
             // failed to join,heading back...
-            // this.$router.push("/channels");
+            if(!this.DEVELOPMENT)
+              this.$router.push("/channels");
           });
       }
     },

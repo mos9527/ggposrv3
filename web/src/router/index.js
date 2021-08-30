@@ -37,12 +37,15 @@ const router = new VueRouter({
   routes
 })
 import store from "../store"
+import { DEVELOPMENT } from "../common/config"
 router.beforeEach((to, from, next) => {  
-  if (store.getters) {        
-    if (to.path == '/login' && store.getters.authenticated) next({ path: '/channels' })        
-    if (to.path == '/channels' && !store.getters.authenticated) next({ path: '/login' })    
-    if (to.path == '/channel' && !store.getters.authenticated) next({ path: '/login' })    
-    if (to.path == '/challenge' && !store.getters.authenticated) next({ path: '/login' })        
+  if (store.getters) {       
+    if (!DEVELOPMENT){
+      if (to.path == '/login' && store.getters.authenticated) next({ path: '/channels' })        
+      if (to.path == '/channels' && !store.getters.authenticated) next({ path: '/login' })    
+      if (to.path == '/channel' && !store.getters.authenticated) next({ path: '/login' })    
+      if (to.path == '/challenge' && !store.getters.authenticated) next({ path: '/login' })        
+    }
   }
   next()
 })

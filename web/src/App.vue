@@ -9,13 +9,13 @@
       </v-container>
       <v-footer app>
         <v-container style="display: flex">
-          <v-btn style="flex: 1" v-if="!authenticated" to="/login">
+          <v-btn style="flex: 1" v-if="DEVELOPMENT || !authenticated" to="/login">
             <v-icon>mdi-account</v-icon> {{ $t("title-login") }}
           </v-btn>
           <v-btn style="flex: 1" to="/">
             <v-icon>mdi-home</v-icon> {{ $t("title-home") }}
           </v-btn>
-          <v-btn style="flex: 1" v-if="authenticated" to="/channels">
+          <v-btn style="flex: 1" v-if="DEVELOPMENT || authenticated" to="/channels">
             <v-icon>mdi-controller-classic</v-icon> {{ $t("title-channels") }}
           </v-btn>
         </v-container>
@@ -37,8 +37,11 @@
 
 <script>
 import { mapGetters } from "vuex";
-
+import { DEVELOPMENT } from "./common/config"
 export default {
+  data:()=>({
+    'DEVELOPMENT':DEVELOPMENT
+  }),
   computed: {
     // mix the getters into computed with object spread operator
     ...mapGetters([
