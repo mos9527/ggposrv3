@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ggpo.events import EventDict, EventThread, ServerEvents
 
 

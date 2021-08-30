@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from logging import info, warning
 from threading import Thread
 from argparse import ArgumentParser

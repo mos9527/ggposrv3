@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from ggpo.models import ThreadsafeDict, ThreadsafeObject
 import os,time,random
 from pathlib import Path
