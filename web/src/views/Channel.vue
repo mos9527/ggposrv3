@@ -20,7 +20,7 @@
     </v-slide-group>
     <v-divider></v-divider>
     <!-- Chat container -->
-    <v-container style="height: calc(100vh - 350px); overflow: scroll">
+    <v-container style="height: calc(100vh - 350px); overflow: scroll ; overflow-x: hidden;">
       <v-container class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
