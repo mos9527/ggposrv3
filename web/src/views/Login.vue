@@ -1,6 +1,8 @@
 <template>
-  <div class="auth-page">
-    <div class="container page">
+  <div class="auth-page">    
+    <div style="position:absolute;top:50%;left:50%;transform: translate(-50%,-50%);" class="container page">
+      <h1 class="mb-2">{{$t('prompt-login',[this.$store.getters.servername])}}</h1>
+      
       <v-form
         @submit.prevent="onSubmit(username, password)"
         lazy-validation
@@ -10,19 +12,19 @@
           class="form-control"
           type="text"
           v-model="username"
-          placeholder="用户名"
+          :placeholder="$t('login-username')"
         />
         <v-text-field
           class="form-control"
           type="password"
           v-model="password"
-          placeholder="密码"
+          :placeholder="$t('login-password')"
         />
         <v-btn
           :disabled="!check"
           type="submit"
           class="btn btn-lg btn-primary float-right"
-          >登陆</v-btn
+          >{{ this.$t('login-action') }}</v-btn
         >
       </v-form>
       <v-container style="color:red">{{errormessage}}</v-container>
@@ -31,9 +33,9 @@
 </template>
 
 <script>
+import Utils from '../common/utils';
 import { AUTH } from "../store/actions.local";
-export default {
-  name: "Login",
+export default {  
   data: () => ({    
     username: '',
     password: '',
@@ -46,15 +48,18 @@ export default {
       }).catch(code=>{
         this.username = ''
         this.password = ''
-        this.errormessage = `登陆失败：${code}`
+        this.errormessage = this.$t('login-failed', [code])
       });
     },
   },
-  computed: {
+  computed: {    
     check() {
       return this.username;
       // return this.username && this.password;
     },
   },
+  mounted(){
+    Utils.setPageTitle(this.$t('title-login'))
+  }
 };
 </script>

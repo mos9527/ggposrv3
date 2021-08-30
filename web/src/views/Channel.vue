@@ -1,6 +1,7 @@
 <template>
-  <v-container class="pa-0" flex style="overflow: hidden">
+  <v-container class="pa-8" flex style="overflow: hidden">
     <!-- User list -->
+    <h1 class="mb-5" style="overflow: hidden;" :key="challengeUpdateKey">{{ getChannelObject(this.name).desc }}</h1>
     <v-slide-group multiple show-arrows class="pa-2">
       <v-slide-item v-for="user in channel_users" :key="user.name">
         <v-btn
@@ -19,7 +20,7 @@
     </v-slide-group>
     <v-divider></v-divider>
     <!-- Chat container -->
-    <v-container style="height: calc(100vh - 200px); overflow: scroll">
+    <v-container style="height: calc(100vh - 350px); overflow: scroll">
       <v-container class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
@@ -47,7 +48,7 @@
               :disabled="!challenge_available[chat.username]"
               :to='`/challenge?challenger=${chat.username}`'
             >
-              接受
+              {{ $t('common-accept') }}
             </v-btn>
             <v-btn
              style="width: 40%" 
@@ -55,7 +56,7 @@
              :disabled="!challenge_available[chat.username]"
              v-on:click="()=>decline_challenge(chat.username)"
             >
-              拒绝
+              {{ $t('common-decline') }}
             </v-btn></v-container
           >
         </v-container>
@@ -83,7 +84,7 @@
           <v-toolbar-title>{{ selectedUser }}</v-toolbar-title>
           <v-spacer></v-spacer>
         </v-toolbar>
-        <v-subheader>私信内容 (不被记录)</v-subheader>
+        <v-subheader>{{ $t('chat-private-message') }}</v-subheader>
         <v-text-field class="pl-4 pr-4 mt-0" v-model="messagePM"></v-text-field>
         <v-container class="text-center">
           <v-btn
@@ -98,7 +99,7 @@
               }
             "
           >
-            发送
+            {{ $t('common-send') }}
           </v-btn>
           <v-btn
             style="width: 50%"
@@ -119,13 +120,13 @@
             v-if="selectedUserStatus.status=='PLAYING' || selectedUserStatus.status=='SPECTATING'"
             :to="'/challenge?spectating=' + selectedUser"
           >
-            观战
+            {{ $t('common-spectate') }}
           </v-btn>
         </v-container>
       </v-card>
     </v-dialog>
 
-    <v-footer app color="transparent" height="72" inset>
+    <v-footer color="transparent" height="72" inset>
       <v-text-field
         class="pr-4"
         background-color="grey lighten-1"
@@ -141,7 +142,7 @@
           }
         "
       ></v-text-field>
-      <v-btn v-on:click="send" icon> <v-icon>mdi-send</v-icon> 发送 </v-btn>
+      <v-btn v-on:click="send" icon> <v-icon>mdi-send</v-icon> {{ $t('common-send') }} </v-btn>
     </v-footer>
   </v-container>
 </template>
@@ -159,7 +160,6 @@ import {
 import { CANCEL_CHALLENGE, CHAT_CHANNEL, PART_CHANNEL, PRIVMSG, SEND_CHALLENGE } from "../store/actions.remote";
 import Utils from "../common/utils";
 export default {
-  name: "Channel",
   props: ["name"],
   data: () => ({
     chats: [
@@ -187,6 +187,10 @@ export default {
     Utils: Utils,
   }),
   methods: {    
+    getChannelObject(channel){
+      for (var chn of this.channels)
+        if (chn.name==channel) return chn      
+    },
     showError(message) {
       this.errorMessage = message;
       this.showErrorDialog = true;
@@ -208,8 +212,7 @@ export default {
         isChallenge: isChallenge,        
         ts: new Date().getTime(),
         ...payload
-      });
-      setTimeout(this.scrollToLast, 100);
+      });      
     },
     scrollToLast() {
       var chats = this.$el.getElementsByClassName("chat");
@@ -228,7 +231,7 @@ export default {
             this.messagePM = "";
           })
           .catch((code) => {
-            this.showError(`发送失败：${code}`);
+            this.showError(this.$t('chat-message-send-failed', [code]));
           });
       } else {
         this.$store.dispatch(CHAT_CHANNEL_L, this.message).then(() => {
@@ -244,10 +247,11 @@ export default {
           .then(() => {
             // joined! lets see who else is here too
             this.$store.dispatch(REFRESH_USERS);
+            this.challengeUpdateKey++
           })
           .catch(() => {
             // failed to join,heading back...
-            this.$router.push("/channels");
+            // this.$router.push("/channels");
           });
       }
     },
@@ -294,6 +298,7 @@ export default {
   },
   computed: {
     ...mapGetters([      
+      "channels",
       "channel_current",
       "channel_users",
       "username",
@@ -304,6 +309,7 @@ export default {
     if (this.sub) this.sub(); // unsubscribe from actions
   },
   mounted() {
+    Utils.setPageTitle(this.$t('title-channel',[this.name]))
     if (this.connected) this.onload();
   },
   watch: {

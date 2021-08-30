@@ -1,41 +1,57 @@
-*::-webkit-scrollbar { display: none; } /*hides scrollbar*/
+body::-webkit-scrollbar {
+    display: none;
+}
+
+
+/*hides scrollbar*/
+
 .chat {
-  background: transparent;
-  transition: all linear 0.5s;
+    background: transparent;
+    transition: all linear 0.5s;
 }
+
 .chat-emphasize-1 {
-  background:linear-gradient(to right,rgba(0,0,0,0) 95%,red)
+    background: linear-gradient(to right, rgba(0, 0, 0, 0) 95%, red)
 }
+
 .chat-emphasize-2 {
-  background:linear-gradient(to right,rgba(0,0,0,0) 95%,green)
+    background: linear-gradient(to right, rgba(0, 0, 0, 0) 95%, green)
 }
+
 .log-view {
-  font-family: monospace;
-  overflow: scroll;
+    font-family: monospace;
+    overflow: scroll;
 }
+
 .overlay {
-  display: block;
-  position: fixed;
-  width: 100vw; 
-  height: 100vh; 
-  background-color: rgba(0, 0, 0, 0.85);
-  color: rgb(232, 232, 232);
-  font-size: 5em;
-  text-align: center;
-  padding: 2rem;   
-  user-select: none;
-  z-index: 99;
+    display: block;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    font-size: 5vw;
+    text-align: center;
+    line-height: 100vh;
+    user-select: none;
+    z-index: 99;
+    opacity: 0.85;
+    background-color: rgb(0, 0, 0);
+    color: rgb(232, 232, 232);
+}
+
+.overlay-fatal {
+    animation: none;
+    background-color: rgb(127, 0, 0);
 }
 
 .on-element {
-  position: absolute;
-  top:0;
-  left: 0;    
-  width: 100%;  
-  height: auto;
-  z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 100;
 }
 
-.log-message{
-  font-family: monospace;
+.log-message {
+    font-family: monospace;
 }

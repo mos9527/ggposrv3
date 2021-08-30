@@ -7,12 +7,10 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: '主页',
     component: Home
   },
   {
     path: '/login',
-    name: '登陆',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -20,18 +18,15 @@ const routes = [
   },
   {
     path: '/channels',
-    name: '频道列表',
     component: () => import('../views/Channels.vue')
   },
   {
     path: '/channel',
-    name: '频道',
     component: () => import('../views/Channel.vue'),
     props : route => ({ 'name': route.query.name }),    
   },
   {
     path: '/challenge',
-    name: '挑战',
     component: () => import('../views/Challenge.vue'),
     props : route => ({ 'challenging': route.query.challenging,'challenger': route.query.challenger,'spectating':route.query.spectating  }),    
   },
@@ -44,17 +39,12 @@ const router = new VueRouter({
 import store from "../store"
 router.beforeEach((to, from, next) => {  
   if (store.getters) {        
-    if (to.name == '登陆' && store.getters.authenticated) next({ path: '/channels' })        
-    if (to.name == '频道列表' && !store.getters.authenticated) next({ path: '/login' })    
-    if (to.name == '频道' && !store.getters.authenticated) next({ path: '/login' })    
-    if (to.name == '挑战' && !store.getters.authenticated) next({ path: '/login' })    
-    next()
+    if (to.path == '/login' && store.getters.authenticated) next({ path: '/channels' })        
+    if (to.path == '/channels' && !store.getters.authenticated) next({ path: '/login' })    
+    if (to.path == '/channel' && !store.getters.authenticated) next({ path: '/login' })    
+    if (to.path == '/challenge' && !store.getters.authenticated) next({ path: '/login' })        
   }
+  next()
 })
-router.afterEach((to) => {  
-  Vue.nextTick(() => {
-      document.title = to.name
-  });
-});
 
 export default router

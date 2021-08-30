@@ -3,7 +3,8 @@ import { SUCCESS } from "./errcode"
 import Client from '../common/client.service'
 const state = {
     username: undefined,
-    password: undefined,    
+    password: undefined, 
+    servername : 'GGPOSRV3',
     authenticated : false
 }
 
@@ -16,6 +17,9 @@ const getters = {
     },
     authenticated(state) {
         return state.authenticated
+    },
+    servername(state){
+        return state.servername
     }
 }
 const actions = {
