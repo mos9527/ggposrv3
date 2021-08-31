@@ -16,7 +16,7 @@ class EventThread(Thread):
     def __init__(self,event_class,run_on_init=True):
         self.event_queue = Queue()
         self.event_handlers = dict()
-        self.event_class = event_class        
+        self.event_class = event_class
         super().__init__(daemon=True)
         if run_on_init:
             self.start()
@@ -25,10 +25,10 @@ class EventThread(Thread):
         event = self.event_class(event)
         self.event_queue.put((event,payload))
 
-    def handle(self,event : Enum,payload):        
+    def handle(self,event : Enum,payload):
         if event in self.event_handlers:
             for handlers in self.event_handlers[event]:
-                handlers(payload)                
+                handlers(payload)
 
     def register(self,event : Enum,function):
         self.event_handlers.setdefault(event,list())
@@ -41,8 +41,8 @@ class EventThread(Thread):
     def run(self):
         while True:
             command,payload = self.event_queue.get()
-            if not command and not payload:return # end-of-life,quitting            
-            self.handle(command,payload)                
+            if not command and not payload:return # end-of-life,quitting
+            self.handle(command,payload)
 
 class RegisterEvent:
     def __init__(self,command,evt : EventThread):
@@ -58,11 +58,11 @@ class RegisterEvent:
             sleep(0.01)
             if self.hit:return True
         return False
-        
+
     def __enter__(self):
         def wrapper(payload):
             self.hit = True
-            self.payload = payload        
+            self.payload = payload
         self.wrapper = self.evt.event_handlers[self.command].append(wrapper)
         return self
 
@@ -78,8 +78,8 @@ class EventDict(dict):
     def __setitem__(self, k,v):
         super().__setitem__(k, v)
         if self.evt: self.evt.emit(self.on_set,v)
-    def __delitem__(self, k):        
-        if self.evt: 
+    def __delitem__(self, k):
+        if self.evt:
             copy_ = copy(self[k])
             super().__delitem__(k)
             return self.evt.emit(self.on_del,copy_)

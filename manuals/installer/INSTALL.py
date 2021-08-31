@@ -3,7 +3,7 @@ INSTALL_DIR = 'moscade'
 # where to install within user's Home
 import os,sys,shutil
 cd = os.getcwd()
-if not os.path.isfile('LAUNCHER.py'):    
+if not os.path.isfile('LAUNCHER.py'):
     print('! 当前目录',cd)
     input('! 找不到 LAUNCHER.py')
     sys.exit(1)
@@ -15,7 +15,7 @@ def copy_launcher(extra=None):
     # write to target folder
     try:
         print('- 复制必要文件')
-        os.makedirs(install_path,exist_ok=True)        
+        os.makedirs(install_path,exist_ok=True)
         shutil.copy('LAUNCHER.py' ,install_path)
         if extra:
             for f in extra:shutil.copy(f,install_path)
@@ -46,20 +46,18 @@ def install_windows():
     '''Creating handler with Registery in Windows'''
     registery = r'''Windows Registry Editor Version 5.00
 
-    [HKEY_CLASSES_ROOT\moscade]
-    @="URL:moscade Protocol"
-    "URL Protocol"=""
+[HKEY_CLASSES_ROOT\moscade]
+@="URL:moscade Protocol"
+"URL Protocol"=""
 
-    [HKEY_CLASSES_ROOT\moscade\shell]
+[HKEY_CLASSES_ROOT\moscade\shell]
 
-    [HKEY_CLASSES_ROOT\moscade\shell\open]
+[HKEY_CLASSES_ROOT\moscade\shell\open]
 
-    [HKEY_CLASSES_ROOT\moscade\shell\open\command]
-    @="\"{}\" \"{}\" \"%1\""
-
-    '''.format(
+[HKEY_CLASSES_ROOT\moscade\shell\open\command]
+@="\"{}\" \"{}\" \"%1\""'''.format(
         sys.executable.replace('\\','\\\\'),
-        os.path.join(install_path,'LAUNCHER.py').replace('\\','\\\\'))    
+        os.path.join(install_path,'LAUNCHER.py').replace('\\','\\\\'))
     open('REGISTER.reg','w',encoding='utf-8').write(registery)
     assert copy_launcher(extra=['REGISTER.reg'])
     # change to target folder
@@ -75,7 +73,7 @@ if __name__ == '__main__':
             os.system('xdg-open moscade://install/')
         elif sys.platform == 'darwin':
             raise Exception("macOS not yet supported")
-        else:        
+        else:
             assert install_windows()
             os.system('start moscade://install/')
     except Exception as e:

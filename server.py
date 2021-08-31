@@ -22,12 +22,12 @@ def get_ip():
         s.close()
     return IP
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     argparse = ArgumentParser(description='GGPO Python3 Server')
     argparse.add_argument('--ggpo-port',help='GGPO portocol port',default=7000)
     argparse.add_argument('--client-port',help='HTTP/Websocket interface port',default=8000)
     args = argparse.parse_args()
-    
+
     ggpo_address = ('0.0.0.0',args.ggpo_port)
     client_address = ('0.0.0.0',args.client_port)
 
@@ -50,8 +50,8 @@ How to access:
         info('Handling exit gracefully')
         info('Player server shutdown...')
         player.server.shutdown()
-        info('...done...Client server shutdown...')               
+        info('...done...Client server shutdown...')
         if not client.server.shutdown():
-            warning('Shutting down forcibly')        
+            warning('Shutting down forcibly')
         info('... All done , going home...')
         sys.exit(0)

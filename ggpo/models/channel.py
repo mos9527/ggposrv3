@@ -4,10 +4,10 @@ from ggpo.events import EventDict, EventThread, ServerEvents
 
 class GGPOChannel:
     """Object representing an GGPO channel."""
-    def __init__(self,evt : EventThread,name,rom='',desc='',chunksize=1096):        
+    def __init__(self,evt : EventThread,name,rom='',desc='',chunksize=1096):
         self.name = name
         self.rom = rom
-        self.chunksize = chunksize        
+        self.chunksize = chunksize
         self.desc = desc
         self.chat_history = list()
         self.clients = EventDict(evt,ServerEvents.CHANNEL_NEW,ServerEvents.CHANNEL_LEFT)
@@ -20,5 +20,5 @@ class GGPOChannel:
 def get_default_channels(evt : EventThread):
     return ({
         'lobby' : GGPOChannel(evt,"lobby",desc="大厅"),
-        'jjbahftf': GGPOChannel(evt,"jjbahftf", "jojobanr1",desc="ジョジョの奇妙な冒険 未来への遺産 - JOJO的奇妙冒险 未来遗产", chunksize=496),    
+        'jjbahftf': GGPOChannel(evt,"jjbahftf", "jojobanr1",desc="ジョジョの奇妙な冒険 未来への遺産 - JOJO的奇妙冒险 未来遗产", chunksize=496),
     })
