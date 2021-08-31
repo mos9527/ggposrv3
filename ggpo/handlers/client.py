@@ -21,7 +21,7 @@ from ggpo.models import quark
 from ggpo.models.quark import allocate_quark, generate_new_ts, quark_same_ts, ts_from_quark
 from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes , player as player_handler
 from ggpo.models.channel import GGPOChannel, get_default_channels
-from ggpo.events import EventDict, EventThread,RegisterEvent, ServerEvents
+from ggpo.events import EventDict, EventThread, ServerEvents
 
 from threading import Lock
 
@@ -121,8 +121,7 @@ class ClientServer(PyWebHost):
         self.events.register(ServerEvents.CHANNEL_LEFT,lambda n:self.on_channel_left(n))
 
 class Client(WebsocketSession):
-    server: ClientServer
-
+    server: ClientServer    
     def log(self, msg, *args, level=DEBUG):
         header = '\033[1m[%s] \033[0m' % self
         self.logger.log(level, header+msg, *args)
@@ -180,9 +179,10 @@ class Client(WebsocketSession):
         return player_handler.server.get_player_by_qurak(self.quark)    
 
     def leave_current_channel(self):        
-        del self.server.channels[self.channel.name].clients[self.username]
-        self.channel = None
-    
+        if self.channel != None: # channel can be none if in dev mode
+            del self.server.channels[self.channel.name].clients[self.username]
+            self.channel = None
+
     def is_client_available_for_match(self,client):
         return client.status == GGPOClientStatus.AVAILABLE and client.channel == self.channel            
 
@@ -212,6 +212,7 @@ class Client(WebsocketSession):
             e = e_.args[0]
             if type(e) == GGPOClientErrorcodes:
                 self.reply(GGPOCommand.ERRORMSG, e)
+            self.log('RECEIVE : AssertionError : %s',e)
         except Exception as e:
             self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.INTERNAL_ERROR)
             self.log('RECEIVE : %s', e, level=ERROR)
@@ -250,14 +251,14 @@ class Client(WebsocketSession):
         '''step 1 of creating a conenction. authenticate and join the club'''
         username,password = str(payload['username']),str(payload['password'])
         # auth success!
-        if not username in self.server.clients:            
+        if username and not username in self.server.clients:            
             self.username = username        
             self.server.clients[username] = self    
             self.set_current_channel(self.server.default_channel.name)
             self.log('LOGIN : OK w/password %s',password,level=INFO)
             return self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.SUCCESS)
         else:
-            self.log('LOGIN : Duped w/password %s',password,level=WARN)
+            self.log('LOGIN : Duped / empty username w/password %s',password,level=WARN)
             return self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.USER_INVALID)
     # region Challenging
     def reset_match(self):
@@ -316,6 +317,7 @@ class Client(WebsocketSession):
 
     def challenge_send(self, peer_username):
         '''sending a challenge'''         
+        assert self.username,"Not logged in"
         peer = self.server.get_client_by_username(peer_username)
 
         assert peer!=self,GGPOClientErrorcodes.USER_INVALID
@@ -383,6 +385,7 @@ class Client(WebsocketSession):
 
     # region Channels
     def channel_join(self, payload):
+        assert self.username,"Not logged in"
         channel_name = payload        
         if channel_name in self.server.channels:            
             self.leave_current_channel()
@@ -393,6 +396,7 @@ class Client(WebsocketSession):
 
     def channel_chat(self,msg):
         '''boardcast channel chat to EVERYONE in the same channel'''
+        assert self.username,"Not logged in"
         self.log('CHANNEL Chat : %s',msg)
         chat = {'username':self.username,'message':msg}
         self.server.boardcast(self.channel.clients,GGPOCommand.CHAT_CHANNEL,chat)
@@ -402,6 +406,7 @@ class Client(WebsocketSession):
 
     # region Peer-to-peer
     def watch_challenge(self,username):
+        assert self.username,"Not logged in"
         peer = self.server.get_client_by_username(username)
         if peer.quark: # peer is either playing or specing a game as well
             ts = ts_from_quark(peer.quark)
@@ -418,6 +423,7 @@ class Client(WebsocketSession):
 
     def privmsg(self,payload):
         '''PMing'''        
+        assert self.username,"Not logged in"
         username,msg = payload['username'],payload['message']
         peer = self.server.get_client_by_username(username)
         self.log('PM -> %s : %s',username,msg)        
@@ -534,9 +540,20 @@ def setup_routing():
             'name': username, 'channel': client.channel.name,'status': client.status.name, 
             'quark_ts': ts_from_quark(client.quark)} for username, client in clients.items()
         ]
-
+    # Routing banners
     server.route('/banners/.*')(allow_cors(Banners().routing))
 
+    @server.route('/home.*')
+    @allow_cors
+    def home_static(initator, request: Request, content):
+        return WriteContentToRequest(request,'./home/'+request.path,mime_type='')
+
+    @server.route('/home')
+    @allow_cors
+    def home(initator, request: Request, content):
+        if not path.isfile('./home/index.html'):
+            return request.send_error(404)
+        return WriteContentToRequest(request,'./home/index.html',mime_type='text/html; charset=UTF-8')
 server = ClientServer()
 
 def run(client_address,ggpo_address): 

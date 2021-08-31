@@ -62,14 +62,12 @@ class RegisterEvent:
     def __enter__(self):
         def wrapper(payload):
             self.hit = True
-            self.payload = payload
-        self.orignal = self.evt.event_handlers[self.command]
-        self.evt.event_handlers[self.command] = [wrapper]
+            self.payload = payload        
+        self.wrapper = self.evt.event_handlers[self.command].append(wrapper)
         return self
 
     def __exit__(self,*a,**k):
-        del self.evt.event_handlers[self.command]
-        self.evt.event_handlers[self.command] = self.orignal
+        self.evt.event_handlers[self.command].remove(self.wrapper)
 
 class EventDict(dict):
     def __init__(self,evt : EventThread,on_set : Enum,on_del : Enum):

@@ -13,6 +13,7 @@
     "node-gyp": "^7.1.2",
     "queue": "^6.0.2",
     "vue": "^2.6.11",
+    "vue-chat-scroll": "^1.4.0",
     "vue-router": "^3.2.0",
     "vuetify": "^2.4.0",
     "vuex": "^3.6.2",

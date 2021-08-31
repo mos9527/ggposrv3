@@ -24,7 +24,7 @@
     <div
       class="overlay"
       :class="connected == false ? 'overlay-fatal' : ''"
-      v-if="!connected"
+      v-if="!connected && !DEVELOPMENT"
     >
       {{
         connected == undefined

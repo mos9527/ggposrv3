@@ -1,4 +1,4 @@
-# client
+# GGPO Web client
 
 ## Project setup
 ```

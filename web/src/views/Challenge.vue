@@ -87,14 +87,14 @@
       <v-btn
         v-if="canceled"
         class="pr-4"
-        style="width: 100%;z-index:100"
+        style="width: 100%; z-index: 100"
         :to="`/channel/?name=${channel_current}`"
-        >{{ $t("common-back-to",[this.channel_current]) }}</v-btn
+        >{{ $t("common-back-to", [this.channel_current]) }}</v-btn
       >
     </v-container>
     <!-- Logs -->
-    <v-container class="log-view pt-0">
-      <div
+    <ul class="log-view pt-0" v-chat-scroll="{ always: false, smooth: true }">
+      <li
         v-for="log in logs"
         :key="log.id"
         :style="'color:' + logColors[log.level]"
@@ -118,23 +118,22 @@
             }}
           </v-btn>
         </div>
-      </div>
-      <div style="display: flex">
-        <v-text-field
-          :placeholder="
-            opponent
-              ? $t('chat-private-message')
-              : $t('chat-channel-message') + ' Ctrl+Enter'
-          "
-          v-model="chatMessage"
-          @keydown.enter="
-            (e) => {
-              if (e.ctrlKey) send(opponent);
-            }
-          "
-        ></v-text-field>
-      </div>
-    </v-container>
+      </li>
+    </ul>
+    <div style="display: flex">
+      <v-text-field
+        :placeholder="
+          (opponent ? $t('chat-private-message') : $t('chat-channel-message')) +
+          ' [Ctrl+Enter]'
+        "
+        v-model="chatMessage"
+        @keydown.enter="
+          (e) => {
+            if (e.ctrlKey && chatMessage) send(opponent);
+          }
+        "
+      ></v-text-field>
+    </div>
   </v-container>
 </template>
 
@@ -182,11 +181,6 @@ export default {
     Utils: Utils,
   }),
   methods: {
-    scrollToLast() {
-      var chats = this.$el.getElementsByClassName("log-message");
-      var last = chats[chats.length - 1];
-      if (last) last.scrollIntoView({ behavior: "smooth" });
-    },
     getIsReadyForSpectating() {
       return (
         this.player1Status &&
@@ -218,7 +212,6 @@ export default {
         msg: msg,
         islink: islink,
       });
-      setTimeout(this.scrollToLast, 100);
     },
     send(isPM) {
       if (isPM) {

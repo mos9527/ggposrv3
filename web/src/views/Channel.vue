@@ -20,8 +20,8 @@
     </v-slide-group>
     <v-divider></v-divider>
     <!-- Chat container -->
-    <v-container style="height: calc(100vh - 350px); overflow: scroll ; overflow-x: hidden;">
-      <v-container class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
+    <ul style="height: calc(100vh - 200px); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
+      <li class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
           v-if="!chat.isChallenge"
@@ -60,8 +60,8 @@
             </v-btn></v-container
           >
         </v-container>
-      </v-container>
-    </v-container>
+      </li>
+    </ul>
     <!-- Error dialog -->
     <v-dialog v-model="showErrorDialog">
       <v-alert
@@ -217,13 +217,9 @@ export default {
         ...payload
       });      
     },
-    scrollToLast() {
-      var chats = this.$el.getElementsByClassName("chat");
-      var last = chats[chats.length - 1];
-      if (last) last.scrollIntoView({ behavior: "smooth" });
-    },
-    send(isPM = false) {
+    send(isPM = false) {      
       if (isPM == true) {
+        if (!this.messagePM) return
         this.$store
           .dispatch(PRIVMSG_L, {
             username: this.selectedUser,
@@ -237,6 +233,7 @@ export default {
             this.showError(this.$t('chat-message-send-failed', [code]));
           });
       } else {
+        if (!this.message) return
         this.$store.dispatch(CHAT_CHANNEL_L, this.message).then(() => {
           console.log("[CHAT] Sent:", this.message);
           this.message = "";

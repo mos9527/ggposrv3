@@ -2,6 +2,11 @@ import Vue from 'vue'
 
 import vuexI18n from 'vuex-i18n';
 import { Store } from 'vuex'
+
+/* ChatScroll */
+import VueChatScroll from 'vue-chat-scroll'
+Vue.use(VueChatScroll)
+/* i18n */
 const i18n_store = new Store()
 
 Vue.use(vuexI18n.plugin,i18n_store)
