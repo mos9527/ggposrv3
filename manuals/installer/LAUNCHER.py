@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# wait am I supposed to i18n THIS thing?
 '''URI handler for the custom moscade:// protocol
 Currently tested on Windows and Manjaro Linux. Feel
 free to provide more testing data on other distros 
@@ -54,14 +55,14 @@ if __name__ == '__main__':
         os.chdir(os.path.dirname(__file__))
         # locate the emulator
         if not os.path.isfile(f'{EMULATOR_PATH}/fcadefbneo.exe'):
-            print('! PATH',os.getcwd(),sep='...')            
-            input('! EMULATOR NOT FOUND, PLEASE REFER TO MANUAL')
+            print('! 当前路径',os.getcwd(),sep='...')            
+            input('! 找不到模拟器！请注意路径大小写及文件结构。')
         else:                        
             # patch the dll, do nothing when file is occupied i.e. client running
             if not patch_ggponet_dll(host=host):
-                print('! UNABLE TO PATCH ggponet.dll')
-                input('! Be sure that it\'s FcadeFBNeo that you\'re using and it contains this file.')
-                sys.exit(1)
+                print('! 无法编辑 ggponet.dll')
+                print('! 可能有正在运行的 FBNeo 占用之，或是文件丢失')
+                print('! 联机有概率出现问题')
             # launching fbneo per os            
             if sys.platform == 'linux':
                 # on linux
@@ -72,14 +73,15 @@ if __name__ == '__main__':
             else:
                 # on windows / cygwin  
                 launcher = 'start'       
-            assert print(os.system('%s' % launcher)) != 127,"Runtime (wine) not installed!"
+            if launcher != 'start': # check for wine if not running on windows
+                assert print(os.system('%s' % launcher)) != 127,"未安装 Wine"
             cmd = f'{launcher} {EMULATOR_PATH}/fcadefbneo.exe "{params}"'
-            os.system(cmd)            
-            sys.exit(0)
+            os.system(cmd)               
+            print('- 启动成功，5s 后自动关闭该窗口')         
+            sleep(5) or sys.exit(0)
     except Exception as e:
         if uri == 'moscade://install/':            
-            print('- 注册 OK!')
-            print('moscade:// Handler installed successfully.')            
+            print('- moscade:// 注册 OK!')                 
         elif uri == 'moscade://browse/':
             if sys.platform == 'linux':
                 os.system('xdg-open "%s"' % os.path.dirname(__file__))
@@ -89,6 +91,5 @@ if __name__ == '__main__':
                 os.system('explorer "%s"' % os.path.dirname(__file__))
                 sys.exit(0)
         else:            
-            print('- Invalid URI : %s' % repr(e))
-            print('- Be sure a backslash (/) is at the end of your URI')
+            print('- 无效的 URI : %s' % repr(e))            
         sleep(2) or sys.exit(1)

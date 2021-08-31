@@ -4,24 +4,24 @@ INSTALL_DIR = 'moscade'
 import os,sys,shutil
 cd = os.getcwd()
 if not os.path.isfile('LAUNCHER.py'):    
-    print('! 当前目录：',cd)
+    print('! 当前目录',cd)
     input('! 找不到 LAUNCHER.py')
     sys.exit(1)
 install_path = os.path.join(os.path.expanduser('~'),INSTALL_DIR)
-print('- 安装目录',install_path,sep='...')
-print('- 解释器' ,sys.executable,sep='...')
+print('- 安装路径',install_path,sep='...')
+print('- Python 解释器' ,sys.executable,sep='...')
 
 def copy_launcher(extra=None):
     # write to target folder
     try:
-        print('- 复制文件')
+        print('- 复制必要文件')
         os.makedirs(install_path,exist_ok=True)        
         shutil.copy('LAUNCHER.py' ,install_path)
         if extra:
             for f in extra:shutil.copy(f,install_path)
         return True
     except Exception as e:
-        print('! 文件复制失败：%s' % e)
+        print('! 复制失败：%s' % e)
         return False
 
 def install_linux():
@@ -64,9 +64,9 @@ def install_windows():
     assert copy_launcher(extra=['REGISTER.reg'])
     # change to target folder
     os.chdir(install_path)
-    print('- 准备注册，检查任务栏')
+    print('- 正在注册，注意任务栏')
     code = os.system('REGISTER.reg')
-    assert code == 0
+    return code == 0
 
 if __name__ == '__main__':
     try:
@@ -77,6 +77,6 @@ if __name__ == '__main__':
             raise Exception("macOS not yet supported")
         else:        
             assert install_windows()
-            os.system('start moscade://install/') == 1,"注册失败"
+            os.system('start moscade://install/')
     except Exception as e:
-        input('! 失败:%s' % e)
+        input('! 注册失败:%s' % repr(e))
