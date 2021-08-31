@@ -9,10 +9,11 @@ ggposrv3
 1. Python 环境
 Python 3.6 及以上即可，**可不配置**环境变量
 2. 脚本准备 （支持 Windows / Linux）
-1.下载 [tools](https://github.com/greats3an/ggposrv3/tree/master/tools) > [installer](https://github.com/greats3an/ggposrv3/tree/master/tools/installer) 目录下的文件至同一本地文件夹
-2.执行 INSTALL.py，按提示完成操作
-3.安装完成，在浏览器地址栏输入：`moscade://browse` 进入模拟器目录
-4.将模拟器目录 FBNEO 复制其中。目录结构此时应类似于：
+
+- 1.下载 [tools](https://github.com/greats3an/ggposrv3/tree/master/tools) > [installer](https://github.com/greats3an/ggposrv3/tree/master/tools/installer) 目录下的文件至同一本地文件夹
+- 2.执行 INSTALL.py，按提示完成操作
+- 3.安装完成，在浏览器地址栏输入：`moscade://browse` 进入模拟器目录
+- 4.将模拟器目录 FBNEO 复制其中。目录结构此时应类似于：
 
         │   LAUNCHER.py
         │   REGISTER.reg        
