@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "fibers": "^5.0.0",
+    "node-gyp": "^7.1.2",
     "queue": "^6.0.2",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
@@ -43,7 +45,12 @@
       "parser": "babel-eslint"
     },
     "rules": {
-      "vue/no-parsing-error": [2, { "x-invalid-end-tag": false }]
+      "vue/no-parsing-error": [
+        2,
+        {
+          "x-invalid-end-tag": false
+        }
+      ]
     }
   },
   "browserslist": [
