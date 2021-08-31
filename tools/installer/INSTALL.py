@@ -69,6 +69,10 @@ def install_windows():
 if __name__ == '__main__':
     try:
         if sys.platform == 'linux':
+            if os.system('wine --version') == 127:
+                print('! 在 Linux 机器上运行需要安装 Wine')
+                input('! 你的设备没有安装，请在完成后回到该脚本')
+                sys.exit(1)
             assert install_linux()
             os.system('xdg-open moscade://install/')
         elif sys.platform == 'darwin':

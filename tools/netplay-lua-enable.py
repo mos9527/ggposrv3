@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from os import stat
-from binaryregex import to_re
+from __init__ import to_re
 import re,mmap
 
 fp = input('- 拖入 fcadefbneo.exe 文件，然后回车：')
