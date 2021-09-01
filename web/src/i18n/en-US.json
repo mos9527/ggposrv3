@@ -8,7 +8,7 @@
     "chat-private-message-send-failed": "Failed to send message",
     "challenge-spectate-match": "Spectating {0}",
     "t-chat-private-message-send-failed-code": "{0}：{1}",
-    "challenge-textfield-message": "{0} Ctrl+Enter",
+    "challenge-textfield-message": "{0} PM [Enter]",
     "challenge-spectate-match-failed": "Unable to spectate：{0}",
     "challenge-canceled-by-remote": "Challenge canceled by remote",
     "challenge-cancel-failed": "Failed to canncel challenge:{0}",

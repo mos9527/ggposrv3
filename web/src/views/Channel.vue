@@ -1,13 +1,15 @@
 <template>
   <v-container class="pa-8" flex style="overflow: hidden">
     <!-- User list -->
-    <h1 class="mb-5" style="overflow: hidden;" :key="challengeUpdateKey">{{ getChannelObject(this.name).desc }}</h1>
+    <h1 class="mb-5" style="overflow: hidden;" :key="challengeUpdateKey">
+      {{ getChannelObject(this.name).desc }}
+      <small style="opacity:0.5">{{ getChannelObject(this.name).rom }}</small>  
+    </h1>
     <v-slide-group multiple show-arrows class="pa-2">
       <v-slide-item v-for="user in channel_users" :key="user.name">
         <v-btn
-          class="mx-2 text-none"
+          class="mr-2"
           :color="badgeColor[user.status]"
-          active-class="purple white--text"
           rounded
           :disabled="user.name == username"
           v-on:click="userMenu"
@@ -20,7 +22,7 @@
     </v-slide-group>
     <v-divider></v-divider>
     <!-- Chat container -->
-    <ul style="height: calc(100vh - 200px); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
+    <ul style="height: calc(100vh - 272px); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
       <li class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
@@ -126,17 +128,13 @@
       </v-card>
     </v-dialog>
 
-    <v-footer color="transparent" height="72" inset style="bottom:100px">
+    <v-container height="72" style="position:fixed;bottom:72px">
       <v-text-field
-        :placeholder="$t('chat-channel-message') + ' [Ctrl+Enter]' "
+        :placeholder="$t('chat-channel-message') + ' [Enter]' "
         v-model="message"
-        @keydown.enter="
-          (e) => {
-            if (e.ctrlKey) send();
-          }
-        "
+        @keydown.enter="send()"
       ></v-text-field>      
-    </v-footer>
+    </v-container>
   </v-container>
 </template>
 

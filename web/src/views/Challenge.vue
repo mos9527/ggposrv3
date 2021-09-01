@@ -124,14 +124,10 @@
       <v-text-field
         :placeholder="
           (opponent ? $t('chat-private-message') : $t('chat-channel-message')) +
-          ' [Ctrl+Enter]'
+          ' [Enter]'
         "
         v-model="chatMessage"
-        @keydown.enter="
-          (e) => {
-            if (e.ctrlKey && chatMessage) send(opponent);
-          }
-        "
+        @keydown.enter="send(opponent);"
       ></v-text-field>
     </div>
   </v-container>

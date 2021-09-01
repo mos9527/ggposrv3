@@ -10,7 +10,7 @@
   "common-back-to": "返回到 {0}",
   "challenge-spectate-match": "观战 {0} 的比赛",
   "t-chat-private-message-send-failed-code": "{0}：{1}",
-  "challenge-textfield-message": "{0} Ctrl+Enter",
+  "challenge-textfield-message": "{0} 私信 [Enter]",
   "challenge-spectate-match-failed": "观战失败：{0}",
   "challenge-canceled-by-remote": "挑战已被取消",
   "challenge-cancel-failed": "挑战取消失败:{0}",

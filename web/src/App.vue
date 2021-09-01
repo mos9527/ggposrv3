@@ -12,7 +12,7 @@
           <v-btn style="flex: 1" v-if="DEVELOPMENT || !authenticated" to="/login">
             <v-icon>mdi-account</v-icon> {{ $t("title-login") }}
           </v-btn>
-          <v-btn style="flex: 1" to="/">
+          <v-btn style="flex: 1" to="/" v-if="DEVELOPMENT || authenticated">
             <v-icon>mdi-home</v-icon> {{ $t("title-home") }}
           </v-btn>
           <v-btn style="flex: 1" v-if="DEVELOPMENT || authenticated" to="/channels">
