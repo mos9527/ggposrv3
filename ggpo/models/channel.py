@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from ggpo.events import EventDict, EventThread, ServerEvents
-
-
+import json
 class GGPOChannel:
     """Object representing an GGPO channel."""
-    def __init__(self,evt : EventThread,name,rom='',desc='',chunksize=1096):
+    def __init__(self,evt : EventThread,name,rom='',desc=''):
         self.name = name
         self.rom = rom
-        self.chunksize = chunksize
         self.desc = desc
         self.chat_history = list()
         self.clients = EventDict(evt,ServerEvents.CHANNEL_NEW,ServerEvents.CHANNEL_LEFT)
@@ -19,6 +17,15 @@ class GGPOChannel:
 # Default channels
 def get_default_channels(evt : EventThread):
     return ({
-        'lobby' : GGPOChannel(evt,"lobby",desc="大厅"),
-        'jjbahftf': GGPOChannel(evt,"jjbahftf", "jojobanr1",desc="ジョジョの奇妙な冒険 未来への遺産 - JOJO的奇妙冒险 未来遗产", chunksize=496),
+        'lobby' : GGPOChannel(evt,"lobby",desc="大厅"),        
     })
+
+def get_channels_from_json(f_:str,evt : EventThread):
+    '''Loads a set of channels from JSON'''
+    channels = dict()
+    with open(f_,encoding='utf-8') as f:
+        channels = json.load(f)
+    return {
+        ch['name']:
+        GGPOChannel(evt,ch['name'],ch['rom'],ch.get('desc') or '') for ch in channels
+    }

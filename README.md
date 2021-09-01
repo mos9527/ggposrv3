@@ -62,6 +62,7 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
 此外界面跟随系统深色模式
 
 ## 服务端
+### 部署
 同样需要 Python 3.6 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
 - 如需阅读日志，则还需 `pip install coloredlogs`
 - 若服务端与客户端在同一机器，确保客户端使用服务端的 LAN IP 访问
@@ -82,7 +83,27 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
                             GGPO portocol port
       --client-port CLIENT_PORT
                             HTTP/Websocket interface port
+                            
+### 配置
+服务器**启动时**会从执行目录下读取这些文件作为配置：
+- `config/banners.json` - 可选；若存在，则读取作为动态横幅资源。格式：
 
+		{
+			"频道名称":"横幅背景视频路径"
+		}
+
+- `config/channels.json` - 可选？；若存在，则读取作为频道列表。格式：
+可参考 [channels.json](https://github.com/greats3an/ggposrv3/blob/master/ggpo/config/channels.json)
+		{
+			[
+				{
+				"name":"频道名称（不建议非 ASCII 字符）",
+				"desc":"频道说明（显示在列表上）",
+				"rom":"游戏 ROM 名",
+				}
+			]		
+		}
+无论该文件存在与否，`大厅` 一直都在
 # Credit
 [poliva/ggposrv - 协议支持](https://github.com/poliva/ggposrv)
 

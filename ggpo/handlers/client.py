@@ -20,12 +20,13 @@ from ggpo.models import quark
 
 from ggpo.models.quark import allocate_quark, generate_new_ts, quark_same_ts, ts_from_quark
 from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes , player as player_handler
-from ggpo.models.channel import GGPOChannel, get_default_channels
+from ggpo.models.channel import GGPOChannel, get_default_channels , get_channels_from_json
 from ggpo.events import EventDict, EventThread, ServerEvents
 
 from threading import Lock
 
 CONFIG_BANNER = 'config/banners.json'
+CONFIG_CHANNELS = 'config/channels.json'
 
 def int32(b: bytes) -> int:
     return unpack('>I', b)[0]
@@ -111,7 +112,7 @@ class ClientServer(PyWebHost):
     def __init__(self):
         self.events = EventThread(ServerEvents)
         self._clients = EventDict(self.events,ServerEvents.USER_NEW,ServerEvents.USER_LEFT)
-        self._channels = get_default_channels(self.events)
+        self._channels = get_default_channels(self.events)        
         self.logger = getLogger('ClientServer')
         self.ggpo_address = ('',0)
         # Registering events
@@ -119,7 +120,10 @@ class ClientServer(PyWebHost):
         self.events.register(ServerEvents.USER_LEFT,lambda n:self.on_user_left(n))
         self.events.register(ServerEvents.CHANNEL_NEW,lambda n:self.on_channel_new(n))
         self.events.register(ServerEvents.CHANNEL_LEFT,lambda n:self.on_channel_left(n))
-
+        # Loading configuration. Unlike Banners,we dont need to cache anything so this will do
+        if path.isfile(CONFIG_CHANNELS):
+            self._channels.update(get_channels_from_json(CONFIG_CHANNELS,self.events))
+        
 class Client(WebsocketSession):
     server: ClientServer
     def log(self, msg, *args, level=DEBUG):
@@ -457,6 +461,9 @@ class Banners:
     '''For managing banners, reads data from local .json file from
     CONFIG_BANNER. Where the keys are the Channel Names and the values
     are the paths to the banners.
+
+    Tbh I just wanted to try out using Singletons...but it really is 
+    HARDLY needed in this case.
     '''
     instance = None
     def __new__(cls):
