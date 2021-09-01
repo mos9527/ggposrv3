@@ -96,13 +96,13 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
 可参考 [channels.json](https://github.com/greats3an/ggposrv3/blob/master/ggpo/config/channels.json)
 
 		{
-			[
-				{
-				"name":"频道名称（不建议非 ASCII 字符）",
-				"desc":"频道说明（显示在列表上）",
-				"rom":"游戏 ROM 名",
-				}
-			]		
+		 [
+		  {
+			"name":"频道名称（不建议非 ASCII 字符）",
+			"desc":"频道说明（显示在列表上）",
+			"rom":"游戏 ROM 名",
+	          },{ ...		  
+		 ]	
 		}
 无论该文件存在与否，`大厅` 一直都在
 # Credit
