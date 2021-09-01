@@ -126,23 +126,16 @@
       </v-card>
     </v-dialog>
 
-    <v-footer color="transparent" height="72" inset>
+    <v-footer color="transparent" height="72" inset style="bottom:100px">
       <v-text-field
-        class="pr-4"
-        background-color="grey lighten-1"
-        dense
-        flat
-        hide-details
-        rounded
-        solo
+        :placeholder="$t('chat-channel-message') + ' [Ctrl+Enter]' "
         v-model="message"
         @keydown.enter="
           (e) => {
             if (e.ctrlKey) send();
           }
         "
-      ></v-text-field>
-      <v-btn v-on:click="send" icon> <v-icon>mdi-send</v-icon> {{ $t('common-send') }} </v-btn>
+      ></v-text-field>      
     </v-footer>
   </v-container>
 </template>
