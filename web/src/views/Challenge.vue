@@ -193,10 +193,10 @@ export default {
       e.currentTarget.classList.remove("primary");
       var channel = this.getChannelObject(this.channel_current);
       var url = `${channel.rom},${this.ggpo_host}:${this.ggpo_port}@${this.quark}`;
-      if (this.opponent) /* We're in a match */ url = `moscade://match,${url}`;
+      if (this.opponent) /* We're in a match */ url = `moscade://match,${url}/`;
       if (this.spectating)
         /* We're spectating */
-        url = `moscade://spectate,${url}`;
+        url = `moscade://spectate,${url}/`;
       console.log("[CHALLENGE] Opening MOSCADE URI", url);
       window.open(url);
     },

@@ -47,5 +47,7 @@
     "title-channel": "Channel {0}",
     "title-challenge": "Challenge {0} vs. {1}",
     "prompt-login":"Login to {0}",
-    "prompt-challenge":"Challenge Status"
+    "prompt-challenge":"Challenge Status",
+    "prompt-incoming-challenge":"A NEW CHALLENGER",
+    "prompt-incoming-challenge-canceled":"Challenge Canceled"
 }

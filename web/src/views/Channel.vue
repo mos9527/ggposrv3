@@ -41,7 +41,7 @@
             {{ chat.username }}
             <small class="ml-2">{{ Utils.getDateString(chat.ts) }}</small>
           </div>
-          <h1 class="pl-3 text--primary font-weight-black">{{challenge_available[chat.username] ? '发起挑战' : '挑战已失效'}}</h1>
+          <h1 class="pl-3 text--primary font-weight-black">{{challenge_available[chat.username] ? $t('prompt-incoming-challenge') : $('prompt-incoming-challenge-canceled')}}</h1>
           <v-container style="text-align:center">
             <v-btn
               style="width: 40%"
