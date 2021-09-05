@@ -5,23 +5,10 @@ ggposrv3
 **注意：现行版本未实现内网穿透，玩家跨局域网联机需要异地组网**
 ## 客户端
 ### 配置
-平台**不需要**下载客户端软件——浏览器内即可匹配连接...但也需要一些*微小的工作*来完成配置。
-1. Python 环境
-Python 3.6 及以上即可，**可不配置**环境变量
-2. 脚本准备 （支持 Windows / Linux）
-
-- 1.下载 [tools](https://github.com/greats3an/ggposrv3/tree/master/tools) > [installer](https://github.com/greats3an/ggposrv3/tree/master/tools/installer) 目录下的文件至同一本地文件夹
-- 2.执行 INSTALL.py，按提示完成操作
-- 3.安装完成，在浏览器地址栏输入：`moscade://browse` 进入模拟器目录
-- 4.将模拟器目录 FBNEO 复制其中。目录结构此时应类似于：
-
-        │   LAUNCHER.py
-        │   REGISTER.reg        
-        └───FBNEO
-            │   fcadefbneo.exe            
-            │   ggponet.dll
-            ...       
-此后则不需要再次配置          
+- 下载 [moscade-fbneo] https://github.com/greats3an/moscade-fbneo/ 
+- 如图，注册 `moscade://` 协议
+  ![Registering moscade](https://user-images.githubusercontent.com/31397301/132114402-e837770b-3304-422f-8b6e-0e83d24eb8ee.png)
+- 你已就绪！可以从网页客户端接受挑战了。
 
 ## 使用
 在 Chrome,Firefox 等 Webkit 系浏览器内打开服务器所提供链接即可。进入后请先登陆（目前不需密码）
