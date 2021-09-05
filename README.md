@@ -5,7 +5,7 @@ ggposrv3
 **注意：现行版本未实现内网穿透，玩家跨局域网联机需要异地组网**
 ## 客户端
 ### 配置
-- 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/)
+- 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/releases)
 - 如图，注册 `moscade://` 协议
   ![Registering moscade](https://user-images.githubusercontent.com/31397301/132114402-e837770b-3304-422f-8b6e-0e83d24eb8ee.png)
 - 你已就绪！可以从网页客户端接受挑战了。
