@@ -34,7 +34,7 @@
   "common-spectate": "观战",
   "chat-message-send-failed": "发送失败：{0}",
   "channels-online-player-count": "在线：{0}",
-  "login-username": "密码",
+  "login-username": "用户名",
   "login-password": "密码",
   "login-action": "登陆",
   "login-failed": "登陆失败：{0}",

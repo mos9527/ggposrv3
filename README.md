@@ -39,19 +39,19 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
    - 加入比赛：在对方接受挑战或观战时，比赛开始后显示；点击即可打开模拟器进行游戏
    - 私信 ： 功能同 5.
 
-⑨.  模拟器:
+⑨.  模拟器 (MOSCade FBNeo):
    - 同 FC 模拟器，可按 T 发送游戏内私信
-   - 该消息可由观战者及玩家所见，观战者**不能**发送信息
+   - 该消息可由观战者及玩家所见，观战者**不能**发送信息 (WIP)
    - 一方退出模拟器将宣布挑战结束
-   - 用户名，聊天信息的中文等非 ASCII 字符将会被替换成 `?`
-   - 可在比赛时使用 Lua 脚本，操作参考 [tools](https://github.com/greats3an/ggposrv3/tree/master/tools)
+   - 用户名，聊天信息的中文等非 ASCII 字符将会被替换成 `?` (WIP)
+   - 可在比赛时使用 Lua 脚本
 
-此外界面跟随系统深色模式
+此外 Web 界面跟随系统深色模式
 
 ## 服务端
 ### 部署
-同样需要 Python 3.6 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
-- 如需阅读日志，则还需 `pip install coloredlogs`
+需要 Python 3.6 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
+- 如需日志，则还需 `pip install coloredlogs`
 - 若服务端与客户端在同一机器，确保客户端使用服务端的 LAN IP 访问
 - 暂时没有内网穿透能力；跨局域网游玩还需配置异地组网：如 OpenVPN，ZeroTier 或 Hamachi,向日葵等。此时客户端及服务端需要在同一网络内
 
