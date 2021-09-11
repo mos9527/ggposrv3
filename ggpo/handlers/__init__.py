@@ -25,12 +25,12 @@ class GGPOCommand(Enum):
     ACCEPT_CHALLENGE  = 0x9
     DECLINE_CHALLENGE = 0xa
     CANCEL_CHALLENGE  = 0x1c
-    NOTIFY_CHALLENGE   = 0x1d
+    NOTIFY_CHALLENGE  = 0x1d
     WATCH_CHALLENGE   = 0x1e
     # players
     CONNECT           = 0x0
     PEER              = 0xb
-    PULL              = 0xc
+    MATCHINFO         = 0xc
     INGAME_CHAT       = 0xf
     SAVESTATE         = 0x11
     GAMEBUFFER        = 0x12

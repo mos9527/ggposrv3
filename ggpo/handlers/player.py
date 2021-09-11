@@ -15,7 +15,7 @@ from ggpo.handlers import client as client_handler,GGPOClientSide,GGPOClientStat
 import traceback
 
 class GGPOServer(ThreadingMixIn, TCPServer):
-    '''Server for handling GGPO player clinets,i.e emulators'''
+    '''Server for handling GGPO player clients,i.e emulators'''
     daemon_threads = True
     @property
     def players(self):
@@ -90,7 +90,7 @@ class GGPOPlayer(StreamRequestHandler):
     @property
     def ascii_username(self):
         '''ASCII character only username,pads unrenderable-chars with ?'''
-        return ''.join([char if ord(char) < 127 else '?' for char in self.username][:60])
+        return ''.join([char if ord(char) < 127 else '?' for char in self.username][:60])    
     @property
     def now(self):
         return datetime.today().strftime("%Y-%m-%d %H:%M:%S")
@@ -151,10 +151,10 @@ class GGPOPlayer(StreamRequestHandler):
             fbaport=self.int32(data[16+quarklen:16+quarklen+4])
             return self.handle_getpeer(quark,fbaport,sequence)
 
-        if (command==GGPOCommand.PULL):
+        if (command==GGPOCommand.MATCHINFO):
             quarklen=self.int32(data[12:16])
             quark=data[16:16+quarklen]
-            return self.handle_pullstate(quark,sequence)
+            return self.handle_matchinfo(quark,sequence)
 
         if (command==GGPOCommand.INGAME_CHAT):
             quarklen=self.int32(data[12:16])
@@ -293,9 +293,9 @@ class GGPOPlayer(StreamRequestHandler):
             # self.log('SAVESTATE -> %s : %r',spectator, response)
             spectator.send(response)
 
-    def handle_pullstate(self, quark, sequence):
+    def handle_matchinfo(self, quark, sequence):
         '''
-        Handling gamebuffer / username pulls, used for syncing gameplay & watching replays
+        Handling matchinfo pulling, used for displaying match info on emulator overlay
         '''
         quark = quark.decode()
         if self.server.quarks.hasquark(quark):
@@ -310,8 +310,8 @@ class GGPOPlayer(StreamRequestHandler):
             sleep(1)
         pdu=self.pad2hex(0)
         if (i<self.PEER_TIMEOUT-1):
-            pdu+=self.sizepad(quarkobject.p1.ascii_username)
-            pdu+=self.sizepad(quarkobject.p2.ascii_username)
+            pdu+=self.sizepad('%s#%d,%d,%s' % (quarkobject.p1.ascii_username,2,5,'cn'))
+            pdu+=self.sizepad('%s#%d,%d,%s' % (quarkobject.p2.ascii_username,4,3,'cn'))
         else:
             # avoid crashing fba if we can't get our peer - sending null usernames
             pdu+=self.pad2hex(0)
@@ -322,6 +322,7 @@ class GGPOPlayer(StreamRequestHandler):
         else: # im specing the match,count me in
             pdu+=self.pad2hex(len(quarkobject.spectators)+1)
         response = self.make_reply(sequence,pdu)
+        self.send(response)
         if self.clienttype==GGPOClientType.PLAYER:
             # call auto_spectate() to record the game here
             self.log('SAVESTATE -> Calling AUTO-SPECTATE')
@@ -449,7 +450,7 @@ class GGPOPlayer(StreamRequestHandler):
                     for player in list(quarkobject.spectators.values())+[quarkobject.p1,quarkobject.p2]:
                         if player and player!=self and not player.closing: # p1 / p2 may have not connected yet
                             self.log('... Closing connection %s',quarkobject.p2)
-                            player.send(b'\xff\xff\x00\x00\xde\xad')
+                            # player.send(b'\xff\xff\x00\x00\xde\xad') # crashes via buffer overflow, should cause AV
                             player.request.close()
                     self.log('... Removing quark %s',self.quark)
                     quarks.pop(self.quark) # the quark is gone
