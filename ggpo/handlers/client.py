@@ -342,8 +342,8 @@ class Client(WebsocketSession):
         assert self.is_client_available_for_match(peer),GGPOClientErrorcodes.PEER_BAD_STATUS
         # create quraks with same ts but different idents
         ts = generate_new_ts()
-        self.quark = allocate_quark(ts=ts)
-        peer.quark = allocate_quark(ts=ts)
+        self.quark = 'quark-1-1' #allocate_quark(ts=ts)
+        peer.quark = 'quark-2-1' #allocate_quark(ts=ts)
         # being challenged, become P2
         self.side = GGPOClientSide.PLAYER2
         peer.side = GGPOClientSide.PLAYER1

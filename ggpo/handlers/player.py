@@ -67,6 +67,7 @@ class GGPOPlayer(StreamRequestHandler):
     the TCP connections from ggpoclient
     """
     PEER_TIMEOUT = 30
+    ENCODING = 'gbk'
     server : GGPOServer
     def __init__(self, request, client_address, server):
         self.username = None            # Client's currently registered username
@@ -86,11 +87,33 @@ class GGPOPlayer(StreamRequestHandler):
     # region Utility
     def log(self,msg,*args,level=DEBUG):
         header = '\033[1m<%s> \033[0m' % self
-        self.logger.log(level,header+msg,*args)
+        self.logger.log(level,header+msg,*args)              
+    @staticmethod
+    def nn(v):
+        '''NONNUL <==> 0xf + 1,'''
+        if int(v) == 0xf + 1:return 0
+        if int(v) == 0:return 0xf + 1
+        return v
+    @staticmethod
+    def to_havles(v):        
+        return bytearray([GGPOPlayer.nn(v[i//2] >> 4) if i % 2 == 0 else GGPOPlayer.nn(v[i//2] & 0x0f) for i in range(0,len(v) * 2)])
+    @staticmethod
+    def from_havles(v):
+        if len(v) % 2: v = v + b'\x00'
+        return bytearray([(GGPOPlayer.nn(v[i]) << 4) | GGPOPlayer.nn(v[i+1]) for i in range(0,len(v),2)])
     @property
     def ascii_username(self):
         '''ASCII character only username,pads unrenderable-chars with ?'''
         return ''.join([char if ord(char) < 127 else '?' for char in self.username][:60])    
+    def decode_from_gbk_whstr(self,src):
+        '''decodes string with gbk w/ halfstring'''
+        return self.from_havles(src).decode(self.ENCODING)
+    def encode_to_gbk_whstr(self,str_):
+        '''encodes string with gbk w/ halfstring'''
+        return self.to_havles(str_.encode(self.ENCODING))
+    @property
+    def encoded_username(self):
+        return self.encode_to_gbk_whstr(self.username)
     @property
     def now(self):
         return datetime.today().strftime("%Y-%m-%d %H:%M:%S")
@@ -243,31 +266,33 @@ class GGPOPlayer(StreamRequestHandler):
         """
         Handle sending messages inside the emulator.
         """
-
         # send the ACK to the client
         #self.send_ack(sequence)
         quark = quark.decode()
-        msg   = msg.decode()
-
+        t_msg,msg = msg[:1],msg[1:]
         # for newer emulators,string comes with a prefix
-        if msg[0]=='V': # version ?
-            return self.log('PRIVMSG Version : %s',msg)
-        if msg[0]=='T': # T-key ? for normal chat
-            msg = msg[1:]
-            self.log('PRIVMSG : %s',msg)
+        if t_msg==b'V': # V - netcode version
+            return self.log('PRIVMSG Version : 0x%s',msg.hex())            
+        print('RECV:',msg.hex(sep=' '))
+        if t_msg==b'T': # T - user chat            
+            self.log('PRIVMSG : %s',self.decode_from_gbk_whstr(msg))
+        elif t_msg==b'S': # S - client command
+            return self.log('PRIVMGS COMMAND : %s',msg)       
 
         peer  = self.server.get_peer_player_by_quark(quark)
 
         pdu=self.sizepad(peer.quark)
-        pdu+=self.sizepad(self.ascii_username)
+        pdu+=self.sizepad(self.encoded_username)
         pdu+=self.sizepad(msg)
+        
         peer.send(self.make_reply(GGPOSequence.INGAME_PRIVMSG,pdu))
-        self.client.server.get_client_by_username(peer.username).onIngameChat(self.client.username,msg)
+        self.client.server.get_client_by_username(peer.username).onIngameChat(self.client.username,self.decode_from_gbk_whstr(msg))
         pdu=self.sizepad(quark)
-        pdu+=self.sizepad(self.ascii_username)
+        pdu+=self.sizepad(self.encoded_username)
         pdu+=self.sizepad(msg)
+
         self.send(self.make_reply(GGPOSequence.INGAME_PRIVMSG,pdu))
-        self.client.server.get_client_by_username(self.username).onIngameChat(self.client.username,msg)
+        self.client.server.get_client_by_username(self.username).onIngameChat(self.client.username,self.decode_from_gbk_whstr(msg))
 
     def handle_gamebuffer(self, quark, gamebuf, sequence):
         """
@@ -310,8 +335,14 @@ class GGPOPlayer(StreamRequestHandler):
             sleep(1)
         pdu=self.pad2hex(0)
         if (i<self.PEER_TIMEOUT-1):
-            pdu+=self.sizepad('%s#%d,%d,%s' % (quarkobject.p1.ascii_username,2,5,'cn'))
-            pdu+=self.sizepad('%s#%d,%d,%s' % (quarkobject.p2.ascii_username,4,3,'cn'))
+            p1 = '%s#%d,%d,%s' % (quarkobject.p1.username,1,0,'cn')
+            p2 = '%s#%d,%d,%s' % (quarkobject.p2.username,2,0,'cn') # are we implmenting this feature lads?
+            self.log('MATCHINFO P1 : %s -> %s',p1,self.encode_to_gbk_whstr(p1).hex(' '))
+            self.log('MATCHINFO P2 : %s -> %s',p2,self.encode_to_gbk_whstr(p2).hex(' '))
+            pdu+=self.sizepad(self.encode_to_gbk_whstr(p1))   
+            pdu+=self.sizepad(self.encode_to_gbk_whstr(p2))
+                     
+            
         else:
             # avoid crashing fba if we can't get our peer - sending null usernames
             pdu+=self.pad2hex(0)
