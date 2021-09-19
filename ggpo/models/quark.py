@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from ggpo.models import ThreadsafeDict, ThreadsafeObject
 import os,time,random
 from pathlib import Path
 from threading import Lock
@@ -10,9 +9,11 @@ class GGPOQuark(object):
         self.quark = quark
         self.p1 = None
         self.p2 = None
+        self.score = {'p1':0,'p2':0}
+        self.characters = {'p1':'','p2':''}
         self.spectators = dict()
 
-class QuarkStorage(ThreadsafeDict):
+class QuarkStorage(dict):
     def __setitem__(self, k,v):
         '''set item by quark ts'''
         super().__setitem__(ts_from_quark(k),v)

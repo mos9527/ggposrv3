@@ -18,7 +18,7 @@ from pywebhost.modules import JSONMessageWrapper, WriteContentToRequest
 from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession, WebsocketSessionWrapper
 from ggpo.models import quark
 
-from ggpo.models.quark import allocate_quark, generate_new_ts, quark_same_ts, ts_from_quark
+from ggpo.models.quark import GGPOQuark, allocate_quark, generate_new_ts, quark_same_ts, ts_from_quark
 from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes , player as player_handler
 from ggpo.models.channel import GGPOChannel, get_default_channels , get_channels_from_json
 from ggpo.events import EventDict, EventThread, ServerEvents
@@ -169,13 +169,22 @@ class Client(WebsocketSession):
         self.quark = None  # game quark we currently in
         self.side = None  # what side we are on
         self.emulator_running = False # is player running the emulator
-        self.opponent : Client = None # the client we are playing against
+        self.opponent : Client = None # the client we are playing against        
         self.lock = Lock()
-
+        
     @property
     def status_report(self):
         '''Client / player status. Updates to both self and opponent during / after matches'''
-        return {'username':self.username,'status':self.status.name,'side':self.side.name,'emulator':self.emulator_running}
+        return {
+            'username':self.username,
+            'status':self.status.name,
+            'side':self.side.name,
+            'emulator':self.emulator_running,
+            'match':{
+                'score':self.player.quarkobject.score,
+                'characters':self.player.quarkobject.characters
+                }
+            } if self.player and self.player.quarkobject else {}
 
     @property
     def player(self):
@@ -195,7 +204,7 @@ class Client(WebsocketSession):
         self.server.channels[channel_name].clients[self.username] = self
 
     def push_status(self):
-        self.log('CHALLENGE : Current status : %s',self.status_report)
+        # self.log('CHALLENGE : Current status : %s',self.status_report)        
         self.reply(GGPOCommand.STATUS,self.status_report)
 
     def update_spectators(self):
@@ -232,13 +241,14 @@ class Client(WebsocketSession):
             self.leave_current_channel()
             del self.server.clients[self.username]
             self.log('... Removed self from server',level=WARNING)
+    # player events
+    def onMatchStatusUpdate(self):        
+        self.push_status()
 
     def onIngameChat(self, username , msg):
         self.reply(GGPOCommand.INGAME_CHAT,{'username':username,'message':msg})
-        for client in self.server.get_spectator_client_by_quark(self.quark):
-            client.reply(GGPOCommand.INGAME_CHAT,{'username':username,'message':msg})
 
-    def onEmulatorConnected(self , player):
+    def onEmulatorConnected(self):
         self.emulator_running = True
         self.reply(GGPOCommand.STATUS,self.status_report)
         if self.opponent:
@@ -246,7 +256,7 @@ class Client(WebsocketSession):
         for client in self.server.get_spectator_client_by_quark(self.quark):
             client.reply(GGPOCommand.STATUS,self.status_report)
 
-    def onEmulatorDisconnect(self , player):
+    def onEmulatorDisconnect(self):
         self.log('CHALLENGE : Handling emulator disconnect',level=WARNING)
         self.emulator_running = False
         self.reset_match()
@@ -342,8 +352,8 @@ class Client(WebsocketSession):
         assert self.is_client_available_for_match(peer),GGPOClientErrorcodes.PEER_BAD_STATUS
         # create quraks with same ts but different idents
         ts = generate_new_ts()
-        self.quark = 'quark-1-1' #allocate_quark(ts=ts)
-        peer.quark = 'quark-2-1' #allocate_quark(ts=ts)
+        self.quark = allocate_quark(ts=ts)
+        peer.quark = allocate_quark(ts=ts)
         # being challenged, become P2
         self.side = GGPOClientSide.PLAYER2
         peer.side = GGPOClientSide.PLAYER1
