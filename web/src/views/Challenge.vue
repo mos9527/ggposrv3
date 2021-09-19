@@ -136,8 +136,8 @@
       </div>
     </v-container>
     <div class="left-fixed" :key="statusUpdateKey" v-if="player1Status.match && player1Status.match.characters">
-      <img class="portrait" style="left:0" :src="`/banners/${this.channel_current}/p1/${this.player1Status.match.characters.p1}`">
-      <img class="portrait" style="right:0" :src="`/banners/${this.channel_current}/p2/${this.player1Status.match.characters.p2}`">
+      <img class="portrait" style="left:0" :src="`/portraits/${this.channel_current}/p1/${this.player1Status.match.characters.p1}`">
+      <img class="portrait" style="right:0" :src="`/portraits/${this.channel_current}/p2/${this.player1Status.match.characters.p2}`">
     </div>    
   </div>
 </template>
