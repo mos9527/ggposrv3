@@ -466,41 +466,6 @@ class Client(WebsocketSession):
         if type(o) != type(self):return False
         return self.username == o.username
 
-class Banners:
-    '''For managing banners, reads data from local .json file from
-    CONFIG_BANNER. Where the keys are the Channel Names and the values
-    are the paths to the banners.
-
-    Tbh I just wanted to try out using Singletons...but it really is 
-    HARDLY needed in this case.
-    '''
-    instance = None
-    def __new__(cls):
-        if not Banners.instance:
-            Banners.instance = object.__new__(cls)
-        return Banners.instance
-    _config = None
-    @property
-    def config(self):
-        if not self._config:
-            try:
-                with open(CONFIG_BANNER,'r') as f:
-                    self._config = json.loads(f.read())
-                    self._config = {k:{'path':v} for k,v in self._config.items()}
-            except:pass
-        return self._config
-    def get_banner_path_and_type(self,banner_name):
-        '''reads filepath from config,detects mime,then cache it'''
-        assert self.config
-        path = self.config[banner_name]['path']
-        # current method : mimetypes
-        self.config[banner_name].setdefault('mime',mimetypes.guess_type(path))
-        return path,self.config[banner_name]['mime']
-    def routing(self,initator, request: Request, content):
-        banner = request.path.split('/banners/')[-1]
-        banner,mime_type = Banners().get_banner_path_and_type(banner)
-        assert banner and mime_type
-        return WriteContentToRequest(request,banner,partial_acknowledge=True,mime_type=mime_type)
 def setup_routing():
     def allow_cors(function):
         def method(initator, request: Request, content):
@@ -557,7 +522,18 @@ def setup_routing():
             'quark_ts': ts_from_quark(client.quark)} for username, client in clients.items()
         ]
     # Routing banners
-    server.route('/banners/.*')(allow_cors(Banners().routing))
+    @server.route('/banners/.*')
+    @allow_cors
+    def banners_static(initator, request: Request, content):
+        return WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1]+'.mp4',mime_type='',partial_acknowledge=True)
+
+    @server.route('/portraits/.*')
+    @allow_cors
+    def portraits_static(initator, request: Request, content):
+        try:
+            WriteContentToRequest(request,'./portraits/'+ request.path.split('/portraits/')[-1] + '.png',mime_type='',partial_acknowledge=True)
+        except:
+            WriteContentToRequest(request,'.'+'/'.join(request.path.split('/')[:-1]) + '/default.png',mime_type='',partial_acknowledge=True)
 
     @server.route('/home.*')
     @allow_cors

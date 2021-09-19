@@ -72,12 +72,6 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
 
 ### 配置
 服务器**启动时**会从执行目录下读取这些文件作为配置：
-- `config/banners.json` - 可选；若存在，则读取作为动态横幅资源。格式：
-
-		{
-			"频道名称":"横幅背景视频路径"
-		}
-
 - `config/channels.json` - 可选？；若存在，则读取作为频道列表。格式：
 可参考 [channels.json](https://github.com/greats3an/ggposrv3/blob/master/ggpo/config/channels.json)
 
