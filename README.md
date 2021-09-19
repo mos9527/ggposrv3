@@ -6,9 +6,7 @@ ggposrv3
 ## 客户端
 ### 配置
 - 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/releases)
-- 如图，注册 `moscade://` 协议
-  ![Registering moscade](https://user-images.githubusercontent.com/31397301/132114402-e837770b-3304-422f-8b6e-0e83d24eb8ee.png)
-- 你已就绪！可以从网页客户端接受挑战了。
+- 运行一般，注册完成后即可从网页客户端接受挑战了。
 
 ## 使用
 在 Chrome,Firefox 等 Webkit 系浏览器内打开服务器所提供链接即可。进入后请先登陆（目前不需密码）
@@ -32,7 +30,7 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
    - - 公屏 ：在 6.聊天框所发送，频道所有成员可见，并会保存的消息
    - - 私信 ：前文所述方式发送，仅双方可见，不保存
    - - 挑战 ：同私信；可选择接受或拒绝挑战。挑战拒绝后可以再次发起
-6. 没截上图的聊天框 ( `д´)，按 Enter 发送信息，**限公屏**
+6. 聊天框,按 Enter 发送信息，**限公屏**
 7. 玩家状态：从左到右为 `P1/P2`,`玩家名`,`模拟器状态`,`玩家身份`,`玩家状态`
 8. 比赛日志：
    - 取消挑战：可随时按下终止或取消已发送的挑战
@@ -84,9 +82,22 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
 	          },{ ...		  
 		 ]	
 		}
-无论该文件存在与否，`大厅` 一直都在
+- `banners` - 可选。存放以频道名称为文件名的 MP4 视频，作横幅使用。
+- `portraits` - 可选。作游戏角色贴图,格式如下：
+
+         portraits
+         |- p1
+         |--- jotaro.png
+         ...
+         |- p2
+         |--- jotaro.png
+         |--- dio.png
+         ...
+
+角色名依照 detector.inf 定义
+
 # Credit
 [poliva/ggposrv - 协议支持](https://github.com/poliva/ggposrv)
 
 
-还有在从 PoC 坚持到现在帮忙测试的朋友们 ( ` ・´)
+还有在从 PoC 坚持到现在帮忙测试的朋友们 👍
