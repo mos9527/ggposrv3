@@ -11,7 +11,7 @@ ggposrv3
 ## 使用
 在 Chrome,Firefox 等 Webkit 系浏览器内打开服务器所提供链接即可。进入后请先登陆（目前不需密码）
 ### 界面介绍
-UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端使用的一些逻辑。
+UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客户端使用的一些逻辑。
 
 ![interface-introduction](https://user-images.githubusercontent.com/31397301/131545696-dce67f3c-01b8-4412-a80f-89ce74d2e1d8.png)
 1. 登陆栏
@@ -51,8 +51,6 @@ UI 设计很大程度上参考了 Fightcade 的原则；下图将解释客户端
 - 如需日志，则还需 `pip install coloredlogs`
 - 若服务端与客户端在同一机器，确保客户端使用服务端的 LAN IP 访问
 - 暂时没有内网穿透能力；跨局域网游玩还需配置异地组网：如 OpenVPN，ZeroTier 或 Hamachi,向日葵等。此时客户端及服务端需要在同一网络内
-
-  注：[这家有可免费（限2客户端）试用的方案](https://www.uulap.com/nsvpc) ，可值得一试
 
 最后运行 server.py 即可
 
