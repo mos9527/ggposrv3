@@ -344,8 +344,8 @@ class GGPOPlayer(StreamRequestHandler):
             sleep(1)
         pdu=self.pad2hex(0)
         if (i<self.PEER_TIMEOUT-1):
-            p1 = '%s#%d,%d,%s' % (quarkobject.p1.username,1,0,'cn')
-            p2 = '%s#%d,%d,%s' % (quarkobject.p2.username,2,0,'cn') # are we implmenting this feature lads?            
+            p1 = '%s#%d,%d,%s' % (quarkobject.p1.username,0,0,'')
+            p2 = '%s#%d,%d,%s' % (quarkobject.p2.username,0,0,'')     
             pdu+=self.sizepad(self.encode_to_gbk_b64(p1))   
             pdu+=self.sizepad(self.encode_to_gbk_b64(p2))                                 
         else:

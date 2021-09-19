@@ -183,9 +183,9 @@ class Client(WebsocketSession):
             'match':{
                 'score':self.player.quarkobject.score,
                 'characters':self.player.quarkobject.characters
-                }
-            } if self.player and self.player.quarkobject else {}
-
+                } if self.player and self.player.quarkobject else {}
+            } 
+            
     @property
     def player(self):
         '''Represents our own GGPOPlayer object, None if not found'''
@@ -276,9 +276,8 @@ class Client(WebsocketSession):
             return self.reply(GGPOCommand.ERRORMSG,GGPOClientErrorcodes.USER_INVALID)
     # region Challenging
     def reset_match(self):
-        if self.opponent: # Resets status for both of us if this was in a match
-            self.log('CHALLENGE : Reverting match status , Opponent was:%s',self.opponent)
-            self.opponent.opponent = None # Do this only on one side
+        if self.opponent: # Resets status for both of us if this was in a match            
+            self.opponent.opponent = None # Do this only on one side            
             client_inmatch = list(self.server.get_player_client_by_quark(self.quark)) + list(self.server.get_spectator_client_by_quark(self.quark))
             for client in client_inmatch:
                 player = player_handler.server.get_player_by_username(client.username)

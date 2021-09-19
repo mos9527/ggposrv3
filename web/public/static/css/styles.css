@@ -75,3 +75,16 @@ ul::-webkit-scrollbar {display: none;}
     left: 50%;
     transform: translate(-50%,-50%);
 }
+
+.centered-horizontal{
+    position: absolute;    
+    left: 50%;
+    transform: translate(-50%,0%);
+}
+
+.portrait {    
+    position: absolute;    
+    top: 50%;
+    max-width: 12vw;        
+    transform: translate(0,-50%);
+}

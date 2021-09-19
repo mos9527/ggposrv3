@@ -1,136 +1,145 @@
 <template>
-  <v-container class="pa-8" flex>
-    <h1>{{ $t("prompt-challenge") }}</h1>
-    <v-container
-      app
-      v-if="player1Status || player2Status"
-      color="transparent"
-      inset
-    >
-      <v-container style="display: flex; flex-direction: column">
-        <div v-if="canceled" class="overlay on-element">
-          {{ $t("challenge-became-not-available") }}
-        </div>
-        <v-container v-if="player1Status" class="mb-0 pa-0">
-          <p style="float: left">
-            <b>P<sub>1</sub></b
-            >：{{ player1Status.username }}
-          </p>
-          <p style="float: right">
-            <strong class="pr-2">
-              <v-icon :color="player1Status.emulator ? 'green' : 'red'"
-                >mdi-switch</v-icon
-              >
-            </strong>
-            <strong class="pr-2">
-              <v-icon
-                :color="player1Status.status == 'PLAYING' ? 'green' : 'red'"
-                >mdi-state-machine</v-icon
-              >
-              {{ player1Status.status }}
-            </strong>
-            <strong class="pr-2">
-              <v-icon :color="player1Status.side == 'PLAYER1' ? 'green' : 'red'"
-                >mdi-account</v-icon
-              >
-              {{ player1Status.side }}
-            </strong>
-          </p>
-        </v-container>
+  <div>
+    <v-container class="centered-horizontal" style="width:80vw" flex>
+      <h1>{{ $t("prompt-challenge") }}</h1>
+      <v-container
+        app
+        v-if="player1Status || player2Status"
+        color="transparent"
+        inset
+      >
+        <v-container style="display: flex; flex-direction: column">
+          <div v-if="canceled" class="overlay on-element">
+            {{ $t("challenge-became-not-available") }}
+          </div>
+          <v-container v-if="player1Status" class="mb-0 pa-0">
+            <p style="float: left">
+              <b>P<sub>1</sub></b
+              >：{{ player1Status.username }}
+            </p>
+            <p style="float: right">
+              <strong class="pr-2">
+                <v-icon :color="player1Status.emulator ? 'green' : 'red'"
+                  >mdi-switch</v-icon
+                >
+              </strong>
+              <strong class="pr-2">
+                <v-icon
+                  :color="player1Status.status == 'PLAYING' ? 'green' : 'red'"
+                  >mdi-state-machine</v-icon
+                >
+                {{ player1Status.status }}
+              </strong>
+              <strong class="pr-2">
+                <v-icon
+                  :color="player1Status.side == 'PLAYER1' ? 'green' : 'red'"
+                  >mdi-account</v-icon
+                >
+                {{ player1Status.side }}
+              </strong>
+            </p>
+          </v-container>
 
-        <v-container v-if="player2Status" class="mb-0 pa-0">
-          <p style="float: left">
-            <b>P<sub>2</sub></b
-            >：{{ player2Status.username }}
-          </p>
-          <p style="float: right">
-            <strong class="pr-2">
-              <v-icon :color="player2Status.emulator ? 'green' : 'red'"
-                >mdi-switch</v-icon
-              >
-            </strong>
-            <strong class="pr-2">
-              <v-icon
-                :color="player2Status.status == 'PLAYING' ? 'green' : 'red'"
-                >mdi-state-machine</v-icon
-              >
-              {{ player2Status.status }}
-            </strong>
-            <strong class="pr-2">
-              <v-icon :color="player2Status.side == 'PLAYER2' ? 'green' : 'red'"
-                >mdi-account</v-icon
-              >
-              {{ player2Status.side }}
-            </strong>
-          </p>
+          <v-container v-if="player2Status" class="mb-0 pa-0">
+            <p style="float: left">
+              <b>P<sub>2</sub></b
+              >：{{ player2Status.username }}
+            </p>
+            <p style="float: right">
+              <strong class="pr-2">
+                <v-icon :color="player2Status.emulator ? 'green' : 'red'"
+                  >mdi-switch</v-icon
+                >
+              </strong>
+              <strong class="pr-2">
+                <v-icon
+                  :color="player2Status.status == 'PLAYING' ? 'green' : 'red'"
+                  >mdi-state-machine</v-icon
+                >
+                {{ player2Status.status }}
+              </strong>
+              <strong class="pr-2">
+                <v-icon
+                  :color="player2Status.side == 'PLAYER2' ? 'green' : 'red'"
+                  >mdi-account</v-icon
+                >
+                {{ player2Status.side }}
+              </strong>
+            </p>
+          </v-container>          
         </v-container>
+        <!-- User list -->
+        <v-slide-group multiple show-arrows class="pa-2">
+          <v-slide-item v-for="user in spectators" :key="user">
+            <v-chip class="mx-2 text-none"> {{ user }} </v-chip>
+          </v-slide-item>
+        </v-slide-group>
+        <!-- Player status -->
+        <v-divider class="mt-0"></v-divider>
       </v-container>
-      <!-- User list -->
-      <v-slide-group multiple show-arrows class="pa-2">
-        <v-slide-item v-for="user in spectators" :key="user">
-          <v-chip class="mx-2 text-none"> {{ user }} </v-chip>
-        </v-slide-item>
-      </v-slide-group>
-      <!-- Player status -->
-      <v-divider class="mt-0"></v-divider>
+      <!-- Controls -->
+      <v-container>
+        <v-btn
+          v-if="!canceled && !this.spectating"
+          class="pr-4"
+          color="error"
+          style="width: 100%"
+          v-on:click="cancel_challenge"
+          >{{ $t("challenge-cancel") }}</v-btn
+        >
+        <v-btn
+          v-if="canceled"
+          class="pr-4"
+          style="width: 100%; z-index: 100"
+          :to="`/channel/?name=${channel_current}`"
+          >{{ $t("common-back-to", [this.channel_current]) }}</v-btn
+        >
+      </v-container>
+      <!-- Logs -->
+      <ul class="log-view pt-0" v-chat-scroll="{ always: false, smooth: true }">
+        <li
+          v-for="log in logs"
+          :key="log.id"
+          :style="'color:' + logColors[log.level]"
+          class="log-message"
+        >
+          <div v-if="!log.islink">
+            [{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}
+          </div>
+          <div v-if="log.islink && !canceled">
+            <v-btn
+              style="width: 100%; height: 48px"
+              :key="statusUpdateKey"
+              :disabled="spectating && !getIsReadyForSpectating()"
+              color="primary"
+              v-on:click="launchPrecursor($event)"
+            >
+              {{
+                spectating && !getIsReadyForSpectating()
+                  ? $t("challenge-waiting-for-player")
+                  : $t("challenge-join-match")
+              }}
+            </v-btn>
+          </div>
+        </li>
+      </ul>
+      <div style="display: flex">
+        <v-text-field
+          :placeholder="
+            (opponent
+              ? $t('chat-private-message')
+              : $t('chat-channel-message')) + ' [Enter]'
+          "
+          v-model="chatMessage"
+          @keydown.enter="send(opponent)"
+        ></v-text-field>
+      </div>
     </v-container>
-    <!-- Controls -->
-    <v-container>
-      <v-btn
-        v-if="!canceled && !this.spectating"
-        class="pr-4"
-        color="error"
-        style="width: 100%"
-        v-on:click="cancel_challenge"
-        >{{ $t("challenge-cancel") }}</v-btn
-      >
-      <v-btn
-        v-if="canceled"
-        class="pr-4"
-        style="width: 100%; z-index: 100"
-        :to="`/channel/?name=${channel_current}`"
-        >{{ $t("common-back-to", [this.channel_current]) }}</v-btn
-      >
-    </v-container>
-    <!-- Logs -->
-    <ul class="log-view pt-0" v-chat-scroll="{ always: false, smooth: true }">
-      <li
-        v-for="log in logs"
-        :key="log.id"
-        :style="'color:' + logColors[log.level]"
-        class="log-message"
-      >
-        <div v-if="!log.islink">
-          [{{ log.level }}] {{ Utils.getDateString(log.ts) }} {{ log.msg }}
-        </div>
-        <div v-if="log.islink && !canceled">
-          <v-btn
-            style="width: 100%; height: 48px"
-            :key="statusUpdateKey"
-            :disabled="spectating && !getIsReadyForSpectating()"
-            color="primary"
-            v-on:click="launchPrecursor($event)"
-          >
-            {{
-              spectating && !getIsReadyForSpectating()
-                ? $t("challenge-waiting-for-player")
-                : $t("challenge-join-match")
-            }}
-          </v-btn>
-        </div>
-      </li>
-    </ul>
-    <div style="display: flex">
-      <v-text-field
-        :placeholder="
-          (opponent ? $t('chat-private-message') : $t('chat-channel-message')) +
-          ' [Enter]'
-        "
-        v-model="chatMessage"
-        @keydown.enter="send(opponent);"
-      ></v-text-field>
-    </div>
-  </v-container>
+    <div class="left-fixed" :key="statusUpdateKey" v-if="player1Status.match && player1Status.match.characters">
+      <img class="portrait" style="left:0" :src="`/banners/${this.channel_current}/p1/${this.player1Status.match.characters.p1}`">
+      <img class="portrait" style="right:0" :src="`/banners/${this.channel_current}/p2/${this.player1Status.match.characters.p2}`">
+    </div>    
+  </div>
 </template>
 
 <script>
