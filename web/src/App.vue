@@ -32,6 +32,7 @@
           : $t("common-connection-unavailable")
       }}
     </div>
+    <audio id="player" autoplay hidden></audio>
   </v-app>
 </template>
 
@@ -40,7 +41,7 @@ import { mapGetters } from "vuex";
 import { DEVELOPMENT } from "./common/config"
 export default {
   data:()=>({
-    'DEVELOPMENT':DEVELOPMENT
+    'DEVELOPMENT':DEVELOPMENT,    
   }),
   computed: {
     // mix the getters into computed with object spread operator

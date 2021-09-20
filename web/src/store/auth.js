@@ -1,5 +1,6 @@
 import { AUTH } from "./actions.local"
 import { SUCCESS } from "./errcode"
+import Utils from "../common/utils";
 import Client from '../common/client.service'
 const state = {
     username: undefined,
@@ -29,7 +30,11 @@ const actions = {
             state.password = credentials.password
             Client.login(state.username, state.password, (code) => {
                 console.log('[AUTH]', code)
-                if (code == SUCCESS) { state.authenticated = true; resolve(code) } else { state.authenticated = false ; reject(code) } 
+                if (code == SUCCESS) { 
+                    state.authenticated = true; 
+                    resolve(code)
+                    Utils.emitSound(Utils.SOUNDS.Welcome)
+                } else { state.authenticated = false ; reject(code) } 
             })
         })
     }

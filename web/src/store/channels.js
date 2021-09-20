@@ -2,6 +2,7 @@ import { JOIN_CHANNEL , PART_CHANNEL } from "./actions.remote"
 import { JOIN_CHANNEL as L_JOIN_CHANNEL, REFRESH_CHANNELS, REFRESH_USERS } from "./actions.local"
 import { SUCCESS } from "./errcode"
 import Client from '../common/client.service'
+import Utils from "../common/utils";
 import store from "."
 
 const state = {
@@ -25,7 +26,11 @@ const actions = {
     [L_JOIN_CHANNEL](context, channel_name) {
         return new Promise((resolve, reject) => {    
             Client.join_channel(channel_name,(code)=>{                            
-                if (code == SUCCESS) { resolve(code); state.channel_current = channel_name } else reject(code)
+                if (code == SUCCESS) {
+                     resolve(code); 
+                     state.channel_current = channel_name
+                     Utils.emitSound(Utils.SOUNDS.GenericNotification)
+                } else reject(code)
             })            
         })
     },    
