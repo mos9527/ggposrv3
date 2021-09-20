@@ -23,7 +23,7 @@
     <v-divider></v-divider>
     <!-- Chat container -->
     <ul style="height: calc(100vh - 272px); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
-      <li class="chat pa-0 mt-2" v-for="chat in chats" :key="chat.ts">
+      <li class="chat pa-0 mt-0" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
           v-if="!chat.isChallenge"
@@ -41,7 +41,7 @@
             {{ chat.username }}
             <small class="ml-2">{{ Utils.getDateString(chat.ts) }}</small>
           </div>
-          <h1 class="pl-3 text--primary font-weight-black">{{challenge_available[chat.username] ? $t('prompt-incoming-challenge') : $('prompt-incoming-challenge-canceled')}}</h1>
+          <h1 class="pl-3 text--primary font-weight-black">{{challenge_available[chat.username] ? $t('prompt-incoming-challenge') : $t('prompt-incoming-challenge-canceled')}}</h1>
           <v-container style="text-align:center">
             <v-btn
               style="width: 40%"
