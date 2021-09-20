@@ -1,13 +1,12 @@
 ggposrv3
 ==================================
-自己搭建 Fightcade 兼容服务器！
+自己搭建 GGPO / Fightcade 私服！
 # 使用
 **注意：现行版本未实现内网穿透，玩家跨局域网联机需要异地组网**
-## 客户端
+## 私服客户端
 ### 配置
 - 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/releases)
 - 运行一遍，注册完成后即可从网页客户端接受挑战了。
-
 ## 使用
 在 Chrome,Firefox 等 Webkit 系浏览器内打开服务器所提供链接即可。进入后请先登陆（目前不需密码）
 ### 界面介绍
@@ -41,7 +40,7 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
    - 同 FC 模拟器，可按 T 发送游戏内私信，支持中文
    - 该消息可由观战者及玩家所见，观战者**能**发送信息 (可能变动)
    - 一方退出模拟器将宣布挑战结束 （可能变动）   
-   - 可在比赛时使用 Lua 脚本 （可能变动）
+   - 可在比赛时使用 Lua 脚本，此时设计**修改内存**的函数将无法调用。 （可能变动）
 
 此外 Web 界面跟随系统深色模式
 
@@ -93,10 +92,9 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
          |--- dio.png
          ...
 
-角色名依照 detector.inf 定义
+角色名依照 detector.inf 定义,详情移步 [How to make Fightcade Memory Detectors](https://docs.google.com/document/d/1IMCigksPxRL0Vg1c0N1OucGL20qXj6y5JVVP_255R-o/edit)
 
 # Credit
-[poliva/ggposrv - 协议支持](https://github.com/poliva/ggposrv)
-
+[poliva/ggposrv - GGPO Tcp协议逆向](https://github.com/poliva/ggposrv)
 
 还有在从 PoC 坚持到现在帮忙测试的朋友们 👍

@@ -5,8 +5,5 @@ quarks/
 __pycache__
 *test*
 *.reg
-*config/banners.json
-*banners/*.*
-portraits*
 *.gypi
 *.desktop
