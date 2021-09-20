@@ -204,7 +204,7 @@ class Client(WebsocketSession):
         self.server.channels[channel_name].clients[self.username] = self
 
     def push_status(self):
-        self.log('CHALLENGE : Current status : %s',self.status_report)        
+        # self.log('CHALLENGE : Current status : %s',self.status_report)        
         self.reply(GGPOCommand.STATUS,self.status_report)
 
     def update_spectators(self):
