@@ -135,9 +135,9 @@
         ></v-text-field>
       </div>
     </v-container>
-    <div class="left-fixed" :key="statusUpdateKey" v-if="player1Status.match && player1Status.match.characters">
-      <img class="portrait" style="left:0" :src="`/portraits/${this.channel_current}/p1/${this.player1Status.match.characters.p1}`">
-      <img class="portrait" style="right:0" :src="`/portraits/${this.channel_current}/p2/${this.player1Status.match.characters.p2}`">
+    <div class="left-fixed" :key="statusUpdateKey" v-if="globalStatus.match && globalStatus.match.characters">
+      <img class="portrait" style="left:0" :src="`/portraits/${this.channel_current}/p1/${this.globalStatus.match.characters.p1}`">
+      <img class="portrait" style="right:0" :src="`/portraits/${this.channel_current}/p2/${this.globalStatus.match.characters.p2}`">
     </div>    
   </div>
 </template>
@@ -178,6 +178,7 @@ export default {
     spectators: [],
     player1Status: {},
     player2Status: {},
+    globalStatus : {},
     statusUpdateKey: 0,
 
     canceled: false,
@@ -352,6 +353,7 @@ export default {
                 this.player1Status = action.payload;
               else if (action.payload.side == "PLAYER1")
                 this.player1Status = action.payload;
+              this.globalStatus = action.payload; // takes whatever comes last
             /* update for P1 */
             if (this.player2Status)
               if (action.payload.username == this.player2Status.username)
