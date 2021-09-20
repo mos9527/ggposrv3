@@ -9,7 +9,7 @@ from datetime import datetime
 
 from socketserver import TCPServer, ThreadingMixIn
 from ggpo.models.quark import GGPOQuark, QuarkStorage, allocate_quark_file, get_quark_file, quark_same_ts, ts_from_quark
-from ggpo.handlers import client as client_handler,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
+from ggpo.handlers import GGPOSysMessage, client as client_handler,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
 
 import traceback,base64
 
@@ -157,7 +157,7 @@ class GGPOPlayer(StreamRequestHandler):
                 return client_ # ts and ident are the same
             if client_.username == self.username:
                 return client_ # quark could been deleted beforehand, use usernames as a fallback
-        raise Exception("Unable to find my client") # then terminates the connection
+        return None
 
     @property
     def quarkobject(self):
@@ -257,6 +257,13 @@ class GGPOPlayer(StreamRequestHandler):
         self.request.close()
     # endregion
     # region GGPO Interfacing
+    def send_sysmessage(self,message):
+        '''Sending System messages. Unlike others, the message is ANSI-only'''
+        pdu=self.sizepad(self.quark)
+        pdu+=self.sizepad('System')
+        pdu+=self.sizepad(message.encode('ascii'))
+        self.send(self.make_reply(GGPOSequence.INGAME_PRIVMSG,pdu))
+
     def handle_connect(self, sequence):
         '''
         Handling WELCOME message, first step of everything
@@ -485,17 +492,19 @@ class GGPOPlayer(StreamRequestHandler):
                 for player in list(self.quarkobject.spectators.values())+[self.quarkobject.p1,self.quarkobject.p2]:
                     if player and player!=self and not player.closing: # p1 / p2 may have not connected yet                        
                         # player.send(b'\xff\xff\x00\x00\xde\xad') # crashes via buffer overflow, should cause AV
-                        player.request.close()
+                        player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method
+                        player.wfile.flush()
+                        player.finish()
                 self.log('... Removing quark %s',self.quark)
                 self.server.quarks.pop(self.quark) # the quark is gone
                 # Notify the client(s),which will then revert the states
-            self.client.onEmulatorDisconnect()
+            if self.client:self.client.onEmulatorDisconnect()
 
         if self.clienttype==GGPOClientType.SPECTATOR:
             # this client is an spectator
             self.log("... Spectator leaving quark %s" , self.quark)
             self.spectator_leave(self.quark)
-            self.client.onEmulatorDisconnect()
+            if self.client:self.client.onEmulatorDisconnect()
 
         players = self.server.players
         if self in players:

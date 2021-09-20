@@ -21,7 +21,7 @@ class QuarkStorage(dict):
         '''get item by quark ts'''
         return super().__getitem__(ts_from_quark(k))
     def pop(self,k):
-        super().pop(ts_from_quark(k))
+        if self.hasquark(k):super().pop(ts_from_quark(k))
     def hasquark(self,k):
         return ts_from_quark(k) in self
 

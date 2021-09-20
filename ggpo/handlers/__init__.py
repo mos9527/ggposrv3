@@ -62,3 +62,6 @@ class GGPOClientErrorcodes(Enum):
     CHANNEL_INVALID   = 0x04
     USER_INVALID      = 0x05
     SUCCESS           = 0xff
+
+class GGPOSysMessage():
+    CLIENT_LEFT       = 'client_leave'

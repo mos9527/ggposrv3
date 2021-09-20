@@ -204,7 +204,7 @@ class Client(WebsocketSession):
         self.server.channels[channel_name].clients[self.username] = self
 
     def push_status(self):
-        # self.log('CHALLENGE : Current status : %s',self.status_report)        
+        self.log('CHALLENGE : Current status : %s',self.status_report)        
         self.reply(GGPOCommand.STATUS,self.status_report)
 
     def update_spectators(self):
@@ -243,7 +243,10 @@ class Client(WebsocketSession):
             self.log('... Removed self from server',level=WARNING)
     # player events
     def onMatchStatusUpdate(self):        
-        self.push_status()
+        if self.opponent:
+            self.opponent.push_status()
+        for client in self.server.get_spectator_client_by_quark(self.quark):
+            client.push_status()
 
     def onIngameChat(self, username , msg):
         self.reply(GGPOCommand.INGAME_CHAT,{'username':username,'message':msg})
@@ -286,29 +289,29 @@ class Client(WebsocketSession):
             # so we don't need to mess with thier states anymore
             # Should this be done by GGPOPlayer already unless it's a client-issued disconenct
             self.status = GGPOClientStatus.AVAILABLE
-            self.opponent.status = GGPOClientStatus.AVAILABLE
+            if self.opponent:self.opponent.status = GGPOClientStatus.AVAILABLE
             self.side = GGPOClientSide.SPEC_PRESAVE
-            self.opponent.side = GGPOClientSide.SPEC_PRESAVE
+            if self.opponent:self.opponent.side = GGPOClientSide.SPEC_PRESAVE
             # reset misc status
             self.reply(GGPOCommand.STATUS,self.status_report)
-            self.reply(GGPOCommand.STATUS,self.opponent.status_report)
-            self.opponent.reply(GGPOCommand.STATUS,self.opponent.status_report)
-            self.opponent.reply(GGPOCommand.STATUS,self.status_report)
+            if self.opponent:self.reply(GGPOCommand.STATUS,self.opponent.status_report)
+            if self.opponent:self.opponent.reply(GGPOCommand.STATUS,self.opponent.status_report)
+            if self.opponent:self.opponent.reply(GGPOCommand.STATUS,self.status_report)
             # syncing up status of both players sperately so we dont get repeated message
             self.server.boardcast(client_inmatch,GGPOCommand.CANCEL_CHALLENGE,self.username)
-            self.server.boardcast(client_inmatch,GGPOCommand.CANCEL_CHALLENGE,self.opponent.username)
+            if self.opponent:self.server.boardcast(client_inmatch,GGPOCommand.CANCEL_CHALLENGE,self.opponent.username)
             # notify everyone in the same channel that the match is no longer available
             for client in self.server.get_spectator_client_by_quark(self.quark):
                 client.reply(GGPOCommand.STATUS,self.status_report)
-                client.reply(GGPOCommand.STATUS,self.opponent.status_report)
+                if self.opponent:client.reply(GGPOCommand.STATUS,self.opponent.status_report)
                 client.quark = None
                 client.status = GGPOClientStatus.AVAILABLE
                 self.log('SPECTATE : Reverted for non-watching spectator %s',client.username)
             # revert status for spectators that dont have their game launched
             self.quark = ''
-            self.opponent.quark = ''
+            if self.opponent:self.opponent.quark = ''
             # reset quark
-            self.opponent = None
+            if self.opponent:self.opponent = None
             # no longer in a match
             self.log('CHALLENGE : Reverted match status for all players / spectators in quark')
             return True
