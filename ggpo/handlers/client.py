@@ -528,15 +528,20 @@ def setup_routing():
     @server.route('/banners/.*')
     @allow_cors
     def banners_static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1]+'.mp4',mime_type='',partial_acknowledge=True)
+        return WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1]+'.mp4',mime_type='video/mp4',partial_acknowledge=True)
 
     @server.route('/portraits/.*')
     @allow_cors
     def portraits_static(initator, request: Request, content):
         try:
-            WriteContentToRequest(request,'./portraits/'+ request.path.split('/portraits/')[-1] + '.png',mime_type='',partial_acknowledge=True)
+            WriteContentToRequest(request,'./portraits/'+ request.path.split('/portraits/')[-1] + '.png',mime_type='image/png')
         except:
-            WriteContentToRequest(request,'.'+'/'.join(request.path.split('/')[:-1]) + '/default.png',mime_type='',partial_acknowledge=True)
+            WriteContentToRequest(request,'.'+'/'.join(request.path.split('/')[:-1]) + '/default.png',mime_type='image/png')
+
+    @server.route('/sounds/.*')
+    @allow_cors
+    def sound_static(initator, request: Request, content):                
+        WriteContentToRequest(request,'./sounds/'+ request.path.split('/sounds/')[-1] + '.wav',mime_type='audio/wav')
 
     @server.route('/home.*')
     @allow_cors
