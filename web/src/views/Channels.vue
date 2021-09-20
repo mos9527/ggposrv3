@@ -2,7 +2,7 @@
   <v-container class="pa-8" fluid>
     <h1 class="mb-5">{{ $t('title-channels') }}</h1>
       <v-row v-for="channel in channels" :key="channel.name">
-        <v-card style="width:100%;margin-top:1vh;z-index:2;overflow:hidden;height:100px" :to="'/channel/?name=' + channel.name">
+        <v-card style="width:100%;margin-top:1vh;z-index:2;overflow:hidden;height:30vh" :to="'/channel/?name=' + channel.name">
           <video
             :src="DEVELOPMENT ? '' : '/banners/' + channel.name"
             class="hero-video" autoplay loop muted
