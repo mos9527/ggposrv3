@@ -98,3 +98,13 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
 [poliva/ggposrv - GGPO Tcp协议逆向](https://github.com/poliva/ggposrv)
 
 还有在从 PoC 坚持到现在帮忙测试的朋友们 👍
+
+# LICENSE
+GPL-2.0
+
+# Copyright..?
+      JoJo's Bizarre Adventure : Heritage For The Future is owned by Capcom (C). The assest used 
+      in this project complies the "fair use" doctirne and were not used to gain financial profits.
+
+      You may freely distribute, share, or modify cotents of this project.However does not guarantee
+      liablity or warrenty. See LICENSE for more info.
