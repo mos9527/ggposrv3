@@ -305,11 +305,12 @@ class GGPOPlayer(StreamRequestHandler):
 
     def handle_gamebuffer(self, quark, gamebuf, sequence):
         """
-        Handling gamebuffer pushes, used for syncing gameplay
+        Handling gamebuffer pushes, used for syncing gameplay 
         """
-        response = self.make_reply(GGPOSequence.GAMEBUFFER,gamebuf)
-        quark = quark.decode()           
-        for spectator in self.server.quarks[self.quark].spectators.values():
+        self.send_ack(sequence)
+        if not self.quarkobject.spectators: return
+        response = self.make_reply(GGPOSequence.GAMEBUFFER,gamebuf)                
+        for spectator in self.quarkobject.spectators.values():
             # self.log('GAMEBUFFER -> %s : %r',spectator, response)
             spectator.send(response)
             spectator.side=GGPOClientSide.SPEC_POSTSAVE     # big chunk transmitted,spectator is to receive states in a smaller size
@@ -319,11 +320,11 @@ class GGPOPlayer(StreamRequestHandler):
         Handling savestate pushes, used for replays & specing
         """
         # send ACK to the player
-        quark = quark.decode()
         self.send_ack(sequence)
+        if not self.quarkobject.spectators: return
         pdu=block2+block1+gamebuf   
-        response = self.make_reply(GGPOSequence.SAVESTATE,pdu)        
-        for spectator in self.server.quarks[self.quark].spectators.values():
+        response = self.make_reply(GGPOSequence.SAVESTATE,pdu)  
+        for spectator in self.quarkobject.spectators.values():
             # self.log('SAVESTATE -> %s : %r',spectator, response)
             spectator.send(response)
 
@@ -334,7 +335,7 @@ class GGPOPlayer(StreamRequestHandler):
         quark = quark.decode()
         if self.server.quarks.hasquark(quark):
             # an ongoing match
-            quarkobject = self.server.quarks[quark]
+            quarkobject = self.quarkobject
         else:
             # nothing to spectate, go away
             return self.finish()
@@ -378,7 +379,7 @@ class GGPOPlayer(StreamRequestHandler):
         self.port=fbaport
         if not self.server.quarks.hasquark(quark):
             self.server.quarks[quark] = GGPOQuark(quark)
-        quarkobject : GGPOQuark = self.server.quarks[quark]
+        quarkobject : GGPOQuark = self.quarkobject
         # transfering info
         self.username = self.client.username
         self.side = self.client.side
@@ -427,7 +428,7 @@ class GGPOPlayer(StreamRequestHandler):
         '''
         quark = quark.decode()
         if self.server.quarks.hasquark(quark):
-            quarkobject = self.server.quarks[quark]
+            quarkobject = self.quarkobject
         else:
             # no match to quark,go away
             return self.finish()
@@ -453,7 +454,7 @@ class GGPOPlayer(StreamRequestHandler):
         '''
         if not self.server.quarks.hasquark(quark):
             return # quark is already gone
-        quarkobject = self.server.quarks[quark]
+        quarkobject = self.quarkobject
         quarkobject.spectators.pop(self.username)
         response=self.make_reply(GGPOSequence.SPEC_VIEWS,self.pad2hex(len(quarkobject.spectators)+1))
         # this updates the number of spectators in both players FBAs
@@ -478,18 +479,15 @@ class GGPOPlayer(StreamRequestHandler):
         self.log('DISCONNECT : Cleaning self & peers\' connection',level=WARNING)
         self.closing = True
 
-        if self.clienttype==GGPOClientType.PLAYER:
-            quarks = self.server.quarks
-            if quarks.hasquark(self.quark):
-                quarkobject = quarks[self.quark]
+        if self.clienttype==GGPOClientType.PLAYER:        
+            if self.quarkobject:                
                 # terminate our peer's connection if they're still up,including spectators
-                for player in list(quarkobject.spectators.values())+[quarkobject.p1,quarkobject.p2]:
-                    if player and player!=self and not player.closing: # p1 / p2 may have not connected yet
-                        self.log('... Closing connection %s',quarkobject.p2)
+                for player in list(self.quarkobject.spectators.values())+[self.quarkobject.p1,self.quarkobject.p2]:
+                    if player and player!=self and not player.closing: # p1 / p2 may have not connected yet                        
                         # player.send(b'\xff\xff\x00\x00\xde\xad') # crashes via buffer overflow, should cause AV
                         player.request.close()
                 self.log('... Removing quark %s',self.quark)
-                quarks.pop(self.quark) # the quark is gone
+                self.server.quarks.pop(self.quark) # the quark is gone
                 # Notify the client(s),which will then revert the states
             self.client.onEmulatorDisconnect()
 
