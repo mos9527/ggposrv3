@@ -234,7 +234,7 @@ class GGPOPlayerSession(WebsocketSession):
         t_msg,msg = msg[:1],msg[1:]
         # for newer emulators,string comes with a prefix
         if t_msg==b'V': # V - netcode version
-            return self.log('PRIVMSG Version : 0x%s',self.decode_from_gbk_b64(msg.hex))
+            return self.log('PRIVMSG Version : 0x%s',self.decode_from_gbk_b64(msg))
         if t_msg==b'T': # T - user chat            
             self.log('PRIVMSG : %s',self.decode_from_gbk_b64(msg))
         elif t_msg==b'S': # S - client command
@@ -361,9 +361,9 @@ class GGPOPlayerSession(WebsocketSession):
         if self.side==GGPOClientSide.PLAYER1 and quarkobject.p1==None:
             quarkobject.p1=self
         elif self.side==GGPOClientSide.PLAYER2 and quarkobject.p2==None:
-            quarkobject.p2=self        
-        pdu=self.sizepad(peer.host) # if not self.server.holepunch else '127.0.0.1')
-        pdu+=self.pad2hex(peer.port)
+            quarkobject.p2=self                    
+        pdu=self.sizepad('127.0.0.1') # peer.host) # if not self.server.holepunch else '127.0.0.1')
+        pdu+=self.pad2hex(9000) # peer.port)
         if self.side==GGPOClientSide.PLAYER1:
             pdu+=self.pad2hex(1)
         else:
@@ -451,6 +451,10 @@ class GGPOPlayerSession(WebsocketSession):
                         player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method                        
                         player.finish()
                 self.log('... Removing quark %s',self.quark)
+                if self.quarkobject.nexus_nodes:
+                    self.log('... Dismantling nexus %s',self.quark)
+                    for node in self.quarkobject.nexus_nodes:
+                        node.close()                        
                 self.server.quarks.pop(self.quark) # the quark is gone
                 # Notify the client(s),which will then revert the states
             if self.client:self.client.onEmulatorDisconnect()
@@ -465,8 +469,7 @@ class GGPOPlayerSession(WebsocketSession):
         if self in players:
             del players[players.index(self)] # removing reference
             self.log("... Removing myself from players")
-        self.log("... All done , going home...")
-        self.request.close()
+        self.log("... All done , going home...")        
 
     def __bool__(self):
         return True

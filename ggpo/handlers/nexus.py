@@ -26,32 +26,13 @@ from ggpo.events import EventDict, EventThread, ServerEvents
 
 from threading import Lock
 
-class GGPONexusQuarks(QuarkStorage):
-    def add_to_quark(self, quark, node):        
-        if not self.hasquark(quark):
-            self[quark] = []
-        self[quark].append(node)
-            
-    def index_from_quark(self,quark,node):        
-        if not self.hasquark(quark): return
-        for idx,node_ in enumerate(self[quark]):
-            if node_.quark == node.quark:
-                return idx
-        return None
-
-    def remove_from_quark(self,quark,node):
-        if not self.hasquark(quark): return
-        del self[quark][self.index_from_quark(quark,node)]
-
-quarks = GGPONexusQuarks()
-
 class GGPONexusSession(WebsocketSession):
     quark = None
 
     def __init__(self, request, raw_frames=True, *a, **k):
-        from ggpo import GGPOServer
-        self.server : GGPOServer        
+        from ggpo import GGPOServer                  
         super().__init__(request, raw_frames=raw_frames, *a, **k)
+        self.server : GGPOServer  = self.request.server            
         self.logger = getLogger('GGPONexusNode')
 
     def log(self,msg,*args,level=DEBUG):
@@ -60,23 +41,27 @@ class GGPONexusSession(WebsocketSession):
 
     def onOpen(self, request=None, content=None):                
         self.quark = self.request.query['quark'][-1]
-        if not self.quark:            
-            return self.close()        
-        self.log("Joining current quark game")
-        quarks.add_to_quark(self.quark,self)
-        
+        if not self.server.quarks.hasquark(self.quark):
+            self.server.quarks[self.quark] = GGPOQuark(self.quark)         
+        self.server.quarks[self.quark].nexus_nodes.append(self)
+        self.current_nodes = self.server.quarks[self.quark].nexus_nodes
+        self.log("Joinied to quark. (current : %s)" % len(self.server.quarks[self.quark].nexus_nodes))
+
     def onClose(self, request=None, content=None):     
-        if self.quark:   
-            self.log("Leaving current quark game")
-            quarks.remove_from_quark(self.quark,self)
+        if request: return
+        if self.quark:               
+            index = self.server.quarks[self.quark].nexus_nodes.index(self)
+            self.log("Leaving current quark game @ %d" % index)
+            del self.server.quarks[self.quark].nexus_nodes[index]
     
     def onReceive(self, frame: Union[bytearray, WebsocketFrame]):
-        # boardcast to everyone in the same quark
-        for node in quarks[self.quark]:
-            node : GGPONexusSession
-            if str(node) != str(self):
-                self.log('Sending to : %s' % node)
-                node.send(frame)            
+        # boardcast to everyone in the same quark        
+        for node in self.current_nodes:
+            node : GGPONexusSession                        
+            node.send(WebsocketFrame(PAYLOAD=frame,OPCODE=2))            
+
+    def __eq__(self, o: object) -> bool:
+        return id(self) == id(o)
 
     def __repr__(self) -> str:
-        return '%s - nexus - %s' % (self.quark,id(self))
+        return '%s - nexus - %s' % (self.quark,self.server.quarks[self.quark].nexus_nodes.index(self))
