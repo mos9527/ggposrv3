@@ -4,7 +4,7 @@ import store from "../store"
 import { CONNECT } from "../store/actions.local";
 const Client = {
   init() {    
-    this.ws = new WebSocket( ENDPOINT.replace('https://','ws://').replace('http://','ws://') + '/ws')
+    this.ws = new WebSocket( ENDPOINT.replace('https://','wss://').replace('http://','ws://') + '/ws')
     this.ws.onmessage = this.onWsMessage
     this.ws.onopen  = this.onWsOpen
     this.ws.onclose = this.onWsClose

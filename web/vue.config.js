@@ -1,5 +1,8 @@
 module.exports = {
   transpileDependencies: [
-    'vuetify'
-  ]
+    'vuetify',    
+  ],
+  publicPath: process.env.NODE_ENV === 'production'
+  ? '/ggpo'
+  : '/'
 }

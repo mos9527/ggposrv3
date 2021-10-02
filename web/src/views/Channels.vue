@@ -4,7 +4,7 @@
       <v-row v-for="channel in channels" :key="channel.name">
         <v-card style="width:100%;margin-top:1vh;z-index:2;overflow:hidden;height:30vh" :to="'/channel/?name=' + channel.name">
           <video
-            :src="DEVELOPMENT ? '' : '/banners/' + channel.name"
+            :src="DEVELOPMENT ? '' : 'banners/' + channel.name"
             class="hero-video" autoplay loop muted
           >  
            <!-- No video banners will be loaded when in development -->

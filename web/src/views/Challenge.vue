@@ -202,7 +202,7 @@ export default {
       console.log(this.channels);
       e.currentTarget.classList.remove("primary");
       var channel = this.getChannelObject(this.channel_current);
-      var url = `${channel.rom},${this.ggpo_host}:${this.ggpo_port}@${this.quark}`;
+      var url = `${channel.rom},${document.location.host}${document.location.pathname}@${this.quark}`;
       if (this.opponent) /* We're in a match */ url = `moscade://match,${url}/`;
       if (this.spectating)
         /* We're spectating */
@@ -384,8 +384,6 @@ export default {
       "channels",
       "username",
       "connected",
-      "ggpo_host",
-      "ggpo_port",
     ]),
     opponent() {
       return this.challenging ? this.challenging : this.challenger;
