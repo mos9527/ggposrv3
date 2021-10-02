@@ -1,77 +1,33 @@
 # -*- coding: utf-8 -*-
-from enum import Enum
 from typing import Union
 from struct import pack,unpack
 from time import sleep
 from logging import ERROR, getLogger,DEBUG,WARNING
-from socketserver import StreamRequestHandler
 from datetime import datetime
+from pywebhost.handler import Request
 
-from socketserver import TCPServer, ThreadingMixIn
-from ggpo.models.quark import GGPOQuark, QuarkStorage, allocate_quark_file, get_quark_file, quark_same_ts, ts_from_quark
-from ggpo.handlers import GGPOSysMessage, client as client_handler,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
+from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
+from ggpo.models.quark import GGPOQuark
+from ggpo.handlers import GGPOSysMessage,GGPOClientSide,GGPOClientStatus,GGPOClientType,GGPOCommand,GGPOSequence
 
 import traceback,base64
 
-class GGPOServer(ThreadingMixIn, TCPServer):
-    '''Server for handling GGPO player clients,i.e emulators'''
-    daemon_threads = True
-    @property
-    def players(self):
-        '''Current players LIST, spectators dont live here'''
-        return self._players
-    @property
-    def quarks(self):
-        '''Current qurak & quarkobjects'''
-        return self._quarks
-
-    def __init__(self):
-        self._players = list()
-        self._quarks = QuarkStorage()
-        self.holepunch = False
-        self.client_address = ('',0)
-        self.logger = getLogger('GGPOServer')
-
-    def bind_and_active(self,address_tuple):
-        super().__init__((address_tuple), GGPOPlayer, bind_and_activate=True)
-
-    def get_peer_player_by_quark(self, quark):
-        """
-        Returns a GGPOClient object representing our FBA *peer*'s ggpofba connection, or None if not found
-        """
-        for player in self.players:
-            if quark_same_ts(player.quark,quark) and quark != player.quark:
-                return player # ts is the same,but ident is diffrent
-        return None
-
-    def get_player_by_qurak(self,quark):
-        for player in self.players:
-            if quark == player.quark:
-                player : GGPOPlayer
-                return player  # ts and ident are the same
-        return None
-
-    def get_player_by_username(self,username):
-        for player in self.players:
-            if username == player.username:
-                return player  # ts and ident are the same
-        return None
-
-    def run(self):
-        self.logger.info('GGPO Server started tcp://%s:%s' % self.server_address)
-        self.serve_forever()
-
-class GGPOPlayer(StreamRequestHandler):
+class GGPOPlayerSession(WebsocketSession):
     """
-    Implements a subset of GGPO TcpConnect protocol, which is to handel
-    the TCP connections from ggpoclient
+    Implements a subset of GGPO TcpConnect protocol over websockets
     """
     PEER_TIMEOUT = 30
     ENCODING = 'gbk'
-    server : GGPOServer
-    def __init__(self, request, client_address, server):
+
+    def __init__(self, request, raw_frames=False, *a, **k):
+        super().__init__(request, raw_frames, *a, **k)
+
+        from ggpo import GGPOServer
+
+        self.server : GGPOServer = self.request.server
+
         self.username = None            # Client's currently registered username
-        self.host = client_address
+        self.host = self.request.client_address[0]
                                                         # Client's hostname / ip.for tcpconnection
         self.clienttype = None
                                                     # Client's type
@@ -81,13 +37,14 @@ class GGPOPlayer(StreamRequestHandler):
                                                 # Client's side
 
         self.closing = False    # Are we currently closing connection
-        self.channel = None     # The channel we are currently in,for logging
+        self.channelobject = None     # The channel we are currently in,for logging
         # Match details
         self.score = 0  # What score do we have
         self.character = '' # what character are we playing as
 
         self.logger = getLogger('GGPOPlayer')
-        super().__init__(request, client_address, server)
+        self.buffer = bytearray()
+                
     # region Utility
     def log(self,msg,*args,level=DEBUG):
         header = '\033[1m<%s> \033[0m' % self
@@ -117,13 +74,11 @@ class GGPOPlayer(StreamRequestHandler):
     @property
     def listen_port(self):
         return self.server.server_address[1]    
+
     def send(self,msg:Union[str,bytes]):
         if type(msg) == str : msg = msg.encode()
-        try:self.wfile.write(msg)
+        try:super().send(WebsocketFrame(OPCODE=2,PAYLOAD=msg))
         except:self.finish()
-
-    def recv(self,s=16384):
-        return self.request.recv(s)
 
     def pad2hex(self,length : int):
         return pack('>I',length)
@@ -152,7 +107,7 @@ class GGPOPlayer(StreamRequestHandler):
     def client(self):
         '''Returns a GGPOClient object representing our *own* client connection, or self if not found'''
         if not self.quark: raise Exception("Trying to fetch client whilst outside a match")
-        for client_ in client_handler.server.get_clients_by_quark(self.quark):
+        for client_ in self.server.get_clients_by_quark(self.quark):
             if client_.quark == self.quark:
                 return client_ # ts and ident are the same
             if client_.username == self.username:
@@ -234,27 +189,25 @@ class GGPOPlayer(StreamRequestHandler):
             self.parse(pdu)
         return response
 
-    def handle(self):
-        data=bytearray()
-        while True:
-            # See if the client has any commands for us.
-            try:
-                data+=self.recv(16384)
-                if (len(data) < 4):continue
-                while (len(data)-4 > self.int32(data[0:4])):
-                    length=self.int32(data[0:4])
-                    response = self.parse(data[0:length+4])
-                    data=data[length+4:]
-                if len(data)-4 == self.int32(data[0:4]):
-                    response = self.parse(data)
-                    data=bytearray()
-                    if response:
-                        self.log('RESPOND : %s',response)
-            except Exception as e:
+    def onReceive(self,data):        
+        # See if the client has any commands for us.
+        try:
+            self.buffer += data
+
+            if (len(self.buffer) < 4):return
+            while (len(self.buffer)-4 > self.int32(self.buffer[0:4])):
+                length=self.int32(self.buffer[0:4])
+                response = self.parse(self.buffer[0:length+4])
+                self.buffer=self.buffer[length+4:]
+            if len(self.buffer)-4 == self.int32(self.buffer[0:4]):
+                response = self.parse(self.buffer)                
+                if response:
+                    self.log('RESPOND : %s',response)
+                self.buffer.clear()
+        except Exception as e:
                 self.log('When reading: %s',e,level=ERROR)
                 self.finish()
-                break
-        self.request.close()
+                return        
     # endregion
     # region GGPO Interfacing
     def send_sysmessage(self,message):
@@ -281,7 +234,7 @@ class GGPOPlayer(StreamRequestHandler):
         t_msg,msg = msg[:1],msg[1:]
         # for newer emulators,string comes with a prefix
         if t_msg==b'V': # V - netcode version
-            return self.log('PRIVMSG Version : 0x%s',msg.hex())                    
+            return self.log('PRIVMSG Version : 0x%s',self.decode_from_gbk_b64(msg.hex))
         if t_msg==b'T': # T - user chat            
             self.log('PRIVMSG : %s',self.decode_from_gbk_b64(msg))
         elif t_msg==b'S': # S - client command
@@ -390,7 +343,7 @@ class GGPOPlayer(StreamRequestHandler):
         # transfering info
         self.username = self.client.username
         self.side = self.client.side
-        self.channel = self.client.channel      
+        self.channelobject = self.client.channelobject      
         # Notify the client that we have connected
         self.client.onEmulatorConnected()
         if quarkobject.p1 and quarkobject.p2:
@@ -404,13 +357,12 @@ class GGPOPlayer(StreamRequestHandler):
             self.log('GETPEER : couldnt find peer!')
             return self.finish()
         else:
-            self.log('GETPEER : Found peer: %s [%s:%s <-> %s:%s]', peer, self.host[0],self.port,peer.host[0],peer.port)
+            self.log('GETPEER : Found peer: %s [%s:%s <-> %s:%s]', peer, self.host,self.port,peer.host,peer.port)
         if self.side==GGPOClientSide.PLAYER1 and quarkobject.p1==None:
             quarkobject.p1=self
         elif self.side==GGPOClientSide.PLAYER2 and quarkobject.p2==None:
-            quarkobject.p2=self
-        # stub : holepunch wip
-        pdu=self.sizepad(peer.host[0] if not self.server.holepunch else '127.0.0.1')
+            quarkobject.p2=self        
+        pdu=self.sizepad(peer.host) # if not self.server.holepunch else '127.0.0.1')
         pdu+=self.pad2hex(peer.port)
         if self.side==GGPOClientSide.PLAYER1:
             pdu+=self.pad2hex(1)
@@ -443,7 +395,7 @@ class GGPOPlayer(StreamRequestHandler):
         self.send_ack(sequence)
         self.clienttype=GGPOClientType.SPECTATOR
         self.quark=quark
-        self.channel = self.client.channel
+        self.channelobject = self.client.channelobject
         self.username = self.client.username # the spectotor must have a quark bound to it
         quarkobject.spectators[self.username] = self
         # spectator count
@@ -474,7 +426,11 @@ class GGPOPlayer(StreamRequestHandler):
         """
         Return the client identifier as included in many command replies.
         """
-        return f"{self.username} - {self.channel.name if self.channel else '???'} - {self.quark}"
+        return f"{self.username} - {self.channelobject.name if self.channelobject else '???'} - {self.quark}"
+
+    def onClose(self, request=None, content=None):
+        if (not Request):
+            self.finish()
 
     def finish(self):
         """
@@ -492,8 +448,7 @@ class GGPOPlayer(StreamRequestHandler):
                 for player in list(self.quarkobject.spectators.values())+[self.quarkobject.p1,self.quarkobject.p2]:
                     if player and player!=self and not player.closing: # p1 / p2 may have not connected yet                        
                         # player.send(b'\xff\xff\x00\x00\xde\xad') # crashes via buffer overflow, should cause AV
-                        player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method
-                        player.wfile.flush()
+                        player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method                        
                         player.finish()
                 self.log('... Removing quark %s',self.quark)
                 self.server.quarks.pop(self.quark) # the quark is gone
@@ -522,9 +477,3 @@ class GGPOPlayer(StreamRequestHandler):
     def __eq__(self, o) -> bool:
         if type(o) != type(self):return False
         return self.username == o.username
-
-server = GGPOServer()
-def run(client_address,ggpo_address):
-    server.client_address = client_address
-    server.bind_and_active(ggpo_address)
-    return server.run()

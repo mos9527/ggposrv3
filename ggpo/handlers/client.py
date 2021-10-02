@@ -1,131 +1,20 @@
 # -*- coding: utf-8 -*-
-import json
-import mimetypes
 import traceback
-from os import path
 from enum import Enum
 from json import dumps,loads
 
 from logging import DEBUG, ERROR, INFO, WARN, WARNING, getLogger
-from struct import unpack, pack
 from time import time
-from typing import Union
-from random import randint
 
-from pywebhost import PyWebHost
-from pywebhost.handler import Request
-from pywebhost.modules import JSONMessageWrapper, WriteContentToRequest
-from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession, WebsocketSessionWrapper
-from ggpo.models import quark
+from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
 
-from ggpo.models.quark import GGPOQuark, allocate_quark, generate_new_ts, quark_same_ts, ts_from_quark
-from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes , player as player_handler
-from ggpo.models.channel import GGPOChannel, get_default_channels , get_channels_from_json
-from ggpo.events import EventDict, EventThread, ServerEvents
+from ggpo.models.quark import allocate_quark, generate_new_ts, ts_from_quark
+from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes
 
 from threading import Lock
 
-CONFIG_BANNER = 'config/banners.json'
-CONFIG_CHANNELS = 'config/channels.json'
+class GGPOClientSession(WebsocketSession):
 
-def int32(b: bytes) -> int:
-    return unpack('>I', b)[0]
-
-def pad2hex(length: int):
-    if type(length) != int:
-        length = length.value
-    return pack('>I', length)
-
-class ClientServer(PyWebHost):
-
-    @property
-    def channels(self):
-        '''All available channels'''
-        return self._channels
-
-    @property
-    def clients(self):
-        '''Clients indexed by their usernames'''
-        return self._clients
-
-    @property
-    def default_channel(self):
-        return self.channels.get('lobby')
-
-    def get_client_by_username(self, username):
-        '''Fetches client by given name,returns None if not found'''
-        if username in self.clients:
-            client: Client = self.clients[username]
-            return client
-        return None
-
-    def get_clients_by_quark(self, quark):
-        '''Fetches all the clients with the quark. Only sensitive to ts.'''
-        for client in self.clients.values():
-            client: Client
-            if quark_same_ts(client.quark, quark):
-                yield client
-
-    def get_spectator_client_by_quark(self,quark):
-        for client in self.get_clients_by_quark(quark):
-            if client.status == GGPOClientStatus.SPECTATING:
-                yield client
-
-    def get_player_client_by_quark(self,quark):
-        for client in self.get_clients_by_quark(quark):
-            if client.status == GGPOClientStatus.PLAYING:
-                yield client
-
-    def get_p1_p2_client_by_quark(self,quark):
-        p1,p2 = None,None
-        for client in self.get_player_client_by_quark(quark):
-            if client.side == GGPOClientSide.PLAYER1:p1=client
-            if client.side == GGPOClientSide.PLAYER2:p2=client
-        return p1,p2
-
-    def bind_and_active(self,address_tuple):
-        super().__init__(address_tuple)
-        return True
-
-    def boardcast(self,to,command : GGPOCommand, payload):
-        replied = 0
-        for client in to if isinstance(to,list) else to.values():
-            client : Client
-            try: replied += client.reply(command,payload)
-            except: pass
-        return replied
-
-    def on_user_new(self,client):
-        pass
-
-    def on_user_left(self,client):
-        pass
-
-    def on_channel_new(self,client):
-        client : Client
-        self.boardcast(client.channel.clients,GGPOCommand.JOIN_CHANNEL,{'username':client.username,'channel':client.channel.name})
-
-    def on_channel_left(self,client):
-        client : Client
-        self.boardcast(client.channel.clients,GGPOCommand.PART_CHANNEL,{'username':client.username,'channel':client.channel.name})
-
-    def __init__(self):
-        self.events = EventThread(ServerEvents)
-        self._clients = EventDict(self.events,ServerEvents.USER_NEW,ServerEvents.USER_LEFT)
-        self._channels = get_default_channels(self.events)        
-        self.logger = getLogger('ClientServer')
-        self.ggpo_address = ('',0)
-        # Registering events
-        self.events.register(ServerEvents.USER_NEW,lambda n:self.on_user_new(n))
-        self.events.register(ServerEvents.USER_LEFT,lambda n:self.on_user_left(n))
-        self.events.register(ServerEvents.CHANNEL_NEW,lambda n:self.on_channel_new(n))
-        self.events.register(ServerEvents.CHANNEL_LEFT,lambda n:self.on_channel_left(n))
-        # Loading configuration. Unlike Banners,we dont need to cache anything so this will do
-        if path.isfile(CONFIG_CHANNELS):
-            self._channels.update(get_channels_from_json(CONFIG_CHANNELS,self.events))
-        
-class Client(WebsocketSession):
-    server: ClientServer
     def log(self, msg, *args, level=DEBUG):
         header = '\033[1m[%s] \033[0m' % self
         self.logger.log(level, header+msg, *args)
@@ -147,6 +36,8 @@ class Client(WebsocketSession):
         return True
 
     def __init__(self, request, raw_frames, *a, **k):
+        super().__init__(request, raw_frames=raw_frames, *a, **k)
+        
         self.command_mapping = {
             GGPOCommand.AUTH:                 self.do_auth,
             GGPOCommand.SEND_CHALLENGE:       self.challenge_send,
@@ -159,17 +50,23 @@ class Client(WebsocketSession):
             GGPOCommand.STATUS:               self.status_update,
             GGPOCommand.WATCH_CHALLENGE:      self.watch_challenge,
         }
-        super().__init__(request, raw_frames=raw_frames, *a, **k)
-        self.server = self.request.server
+        
+        from ggpo import GGPOServer                
+        self.server : GGPOServer = self.request.server
+
         self.logger = getLogger('Client')
 
         self.username = ''  # who we are
         self.status = GGPOClientStatus.AVAILABLE  # player status
-        self.channel = None  # player current channel
+        
+        self.channelobject = None  # player current channel
         self.quark = None  # game quark we currently in
+        
         self.side = None  # what side we are on
         self.emulator_running = False # is player running the emulator
-        self.opponent : Client = None # the client we are playing against        
+        
+        self.opponent : GGPOClientSession = None # the client we are playing against        
+        
         self.lock = Lock()
         
     @property
@@ -184,23 +81,27 @@ class Client(WebsocketSession):
                 'score':self.player.quarkobject.score,
                 'characters':self.player.quarkobject.characters
                 } if self.player and self.player.quarkobject else {}
-            } 
-            
+            }     
+    @property
+    def quarkobject(self):
+        if self.server.quarks.hasquark(self.quark):
+            return self.server.quarks[self.quark]
+        return None            
     @property
     def player(self):
         '''Represents our own GGPOPlayer object, None if not found'''
-        return player_handler.server.get_player_by_qurak(self.quark)
+        return self.server.get_player_by_qurak(self.quark)
 
     def leave_current_channel(self):
-        if self.channel != None: # channel can be none if in dev mode
-            del self.server.channels[self.channel.name].clients[self.username]
-            self.channel = None
+        if self.channelobject != None: # channel can be none if in dev mode
+            del self.server.channels[self.channelobject.name].clients[self.username]
+            self.channelobject = None
 
     def is_client_available_for_match(self,client):
-        return client.status == GGPOClientStatus.AVAILABLE and client.channel == self.channel
+        return client.status == GGPOClientStatus.AVAILABLE and client.channelobject == self.channelobject
 
     def set_current_channel(self,channel_name):
-        self.channel = self.server.channels[channel_name]
+        self.channelobject = self.server.channels[channel_name]
         self.server.channels[channel_name].clients[self.username] = self
 
     def push_status(self):
@@ -283,7 +184,7 @@ class Client(WebsocketSession):
             self.opponent.opponent = None # Do this only on one side            
             client_inmatch = list(self.server.get_player_client_by_quark(self.quark)) + list(self.server.get_spectator_client_by_quark(self.quark))
             for client in client_inmatch:
-                player = player_handler.server.get_player_by_username(client.username)
+                player = self.server.get_player_by_username(client.username)
                 if player : player.finish() # only when there is a emulator attached
             # Kills the emulators,making both clients' on_disconnect() handled
             # so we don't need to mess with thier states anymore
@@ -368,7 +269,7 @@ class Client(WebsocketSession):
         peer.opponent = self
         self.opponent = peer
         # let everyone in the same channel know
-        self.server.boardcast(self.channel.clients,GGPOCommand.NOTIFY_CHALLENGE,self.username)
+        self.server.boardcast(self.channelobject.clients,GGPOCommand.NOTIFY_CHALLENGE,self.username)
         # syncing up status of both clients
         self.reply(GGPOCommand.STATUS,self.status_report)
         self.reply(GGPOCommand.STATUS,self.opponent.status_report)
@@ -406,7 +307,7 @@ class Client(WebsocketSession):
         if channel_name in self.server.channels:
             self.leave_current_channel()
             self.set_current_channel(channel_name)
-            self.log('CHANNEL Joining : %s', self.channel.name)
+            self.log('CHANNEL Joining : %s', self.channelobject.name)
             return self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.SUCCESS)
         self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.CHANNEL_INVALID)
 
@@ -415,8 +316,8 @@ class Client(WebsocketSession):
         assert self.username,"Not logged in"
         self.log('CHANNEL Chat : %s',msg)
         chat = {'username':self.username,'message':msg}
-        self.server.boardcast(self.channel.clients,GGPOCommand.CHAT_CHANNEL,chat)
-        self.channel.chat_history.append({**chat,'ts':int(time()*1000)})
+        self.server.boardcast(self.channelobject.clients,GGPOCommand.CHAT_CHANNEL,chat)
+        self.channelobject.chat_history.append({**chat,'ts':int(time()*1000)})
         return self.reply(GGPOCommand.ERRORMSG, GGPOClientErrorcodes.SUCCESS)
     # endregion
 
@@ -457,7 +358,7 @@ class Client(WebsocketSession):
     # endregion
 
     def __repr__(self):
-        return f'{self.username if self.username else "???"}@{self.channel.name if self.channel else "???"}{","+self.quark if self.quark else ""}'
+        return f'{self.username if self.username else "???"}@{self.channelobject.name if self.channelobject else "???"}{","+self.quark if self.quark else ""}'
 
     def __bool__(self):
         return True
@@ -468,98 +369,3 @@ class Client(WebsocketSession):
     def __eq__(self, o) -> bool:
         if type(o) != type(self):return False
         return self.username == o.username
-
-def setup_routing():
-    def allow_cors(function):
-        def method(initator, request: Request, content):
-            request.send_header('Access-Control-Allow-Origin','*')
-            return function(initator,request,content)
-        return method
-
-    @server.route('/.*')
-    def static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./web/dist/'+request.path,mime_type='')
-
-    @server.route('/')
-    def index(initator, request: Request, content):
-        return WriteContentToRequest(request,'./web/dist/'+'index.html',mime_type='text/html; charset=UTF-8')
-
-    @server.route('/port')
-    @JSONMessageWrapper(read=False)
-    @allow_cors
-    def port(initator, request: Request, content):
-        request.send_response(200)
-        return {'host':server.ggpo_address[0],'port':server.ggpo_address[1]}
-
-    @server.route('/ws')
-    @WebsocketSessionWrapper()
-    def websocket(initator, request: Request, content):
-        return Client
-
-    @server.route('/channels')
-    @JSONMessageWrapper(read=False)
-    @allow_cors
-    def channels(initator, request: Request, content):
-        request.send_response(200)
-        return [channel.__dict__() for channel in server.channels.values()]
-
-    @server.route('/channels/chathistory')
-    @JSONMessageWrapper(read=False)
-    @allow_cors
-    def users(initator, request: Request, content):
-        channel = request.query['channel'][-1]
-        if not channel:return request.send_response(404)
-        request.send_response(200)
-        return server.channels[channel].chat_history
-
-    @server.route('/channels/users')
-    @JSONMessageWrapper(read=False)
-    @allow_cors
-    def users(initator, request: Request, content):
-        channel = request.query['channel'][-1]
-        if not channel:return request.send_response(404)
-        request.send_response(200)
-        clients = server.channels[channel].clients
-        return [{
-            'name': username, 'channel': client.channel.name,'status': client.status.name,
-            'quark_ts': ts_from_quark(client.quark)} for username, client in clients.items()
-        ]
-    # Routing banners
-    @server.route('/banners/.*')
-    @allow_cors
-    def banners_static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1]+'.mp4',mime_type='video/mp4',partial_acknowledge=True)
-
-    @server.route('/portraits/.*')
-    @allow_cors
-    def portraits_static(initator, request: Request, content):
-        try:
-            WriteContentToRequest(request,'./portraits/'+ request.path.split('/portraits/')[-1] + '.png',mime_type='image/png')
-        except:
-            WriteContentToRequest(request,'.'+'/'.join(request.path.split('/')[:-1]) + '/default.png',mime_type='image/png')
-
-    @server.route('/sounds/.*')
-    @allow_cors
-    def sound_static(initator, request: Request, content):                
-        WriteContentToRequest(request,'./sounds/'+ request.path.split('/sounds/')[-1] + '.wav',mime_type='audio/wav')
-
-    @server.route('/home.*')
-    @allow_cors
-    def home_static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./home/'+request.path,mime_type='')
-
-    @server.route('/home')
-    @allow_cors
-    def home(initator, request: Request, content):
-        if not path.isfile('./home/index.html'):
-            return request.send_error(404)
-        return WriteContentToRequest(request,'./home/index.html',mime_type='text/html; charset=UTF-8')
-server = ClientServer()
-
-def run(client_address,ggpo_address):
-    getLogger('Request').setLevel(ERROR)
-    getLogger('PyWebHost').setLevel(ERROR)
-    server.ggpo_address = ggpo_address
-    server.bind_and_active(client_address) and setup_routing()
-    server.logger.info('Client Server started http://%s:%s' % server.server_address)
-    return server.serve_forever()
