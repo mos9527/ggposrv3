@@ -52,7 +52,7 @@ if __name__ == '__main__':
     @server.route('/')
     def index(initator, request: Request, content):
         return WriteContentToRequest(request,'./web/dist/'+'index.html',mime_type='text/html; charset=UTF-8')
-
+    
     @server.route('/channels')
     @JSONMessageWrapper(read=False)
     @allow_cors
@@ -100,11 +100,6 @@ if __name__ == '__main__':
     def sound_static(initator, request: Request, content):                
         WriteContentToRequest(request,'./sounds/'+ request.path.split('/sounds/')[-1] + '.wav',mime_type='audio/wav')
 
-    @server.route('/home.*')
-    @allow_cors
-    def home_static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./home/'+request.path,mime_type='')
-
     @server.route('/home')
     @allow_cors
     def home(initator, request: Request, content):
@@ -126,13 +121,6 @@ if __name__ == '__main__':
     @WebsocketSessionWrapper()
     def websocket3(initator, request: Request, content):
         return GGPOPlayerSession
-
-    @server.route('/port')
-    @JSONMessageWrapper(read=False)
-    @allow_cors
-    def port(initator, request: Request, content):
-        request.send_response(200)
-        return {'host':'localhost','port':7000}
 
     logging.getLogger('PyWebHost').setLevel(logging.FATAL)
     logging.info('READY : http://127.0.0.1:%d' % args.port)

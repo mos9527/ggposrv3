@@ -114,6 +114,7 @@ class GGPOClientSession(WebsocketSession):
     def onReceive(self, frame: bytearray):
         '''handles frames'''
         try:
+            if not frame: return # Reserved for keep-alive
             frame = loads(frame.decode())
             frame_cmd,frame_payload = frame['type'],frame['data']
             frame_cmd = GGPOCommand[frame_cmd]
