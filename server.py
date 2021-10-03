@@ -32,26 +32,6 @@ def get_ip():
         s.close()
     return IP
 
-class test(WebsocketSession):
-    def test(self):
-        while True:
-            try:
-                self.n += 1
-                self.send(WebsocketFrame(PAYLOAD='test:%s...'%self.n,OPCODE=2))
-                logging.info('Test No %d sent.'% self.n)                
-                time.sleep(1)
-            except:
-                logging.error('...terminated')
-                return
-
-    def __init__(self, request, raw_frames=False, *a, **k):
-        super().__init__(request, raw_frames=raw_frames, *a, **k)
-        self.t = threading.Thread(target=self.test,daemon=True)
-        self.n = 0
-        
-    def onOpen(self, request=None, content=None):        
-        self.t.start()
-
 if __name__ == '__main__':
     argparse = ArgumentParser(description='GGPO Python3 Server')
     argparse.add_argument('--port',help='HTTP port',default=7000,type=int)
@@ -132,25 +112,20 @@ if __name__ == '__main__':
             return request.send_error(404)
         return WriteContentToRequest(request,'./home/index.html',mime_type='text/html; charset=UTF-8')
 
-    @server.route('/nexus')
-    @WebsocketSessionWrapper()
-    def websocket2(initator, request: Request, content):
-        return GGPONexusSession
-
     @server.route('/ws')
     @WebsocketSessionWrapper()
     def websocket(initator, request: Request, content):
         return GGPOClientSession
 
+    @server.route('/nexus')
+    @WebsocketSessionWrapper()
+    def websocket2(initator, request: Request, content):
+        return GGPONexusSession
+
     @server.route('/ggpo')
     @WebsocketSessionWrapper()
     def websocket3(initator, request: Request, content):
         return GGPOPlayerSession
-
-    @server.route('/test')
-    @WebsocketSessionWrapper()
-    def websocket4(initator, request: Request, content):
-        return test
 
     @server.route('/port')
     @JSONMessageWrapper(read=False)
