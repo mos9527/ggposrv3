@@ -2,7 +2,7 @@
 <div>
   <iframe v-if="!DEVELOPMENT" style="border:none;width:100%;height:calc(100vh - 56px);" src="/home" onload="
     if(this.contentDocument.title.indexOf('404') >= 0)
-      this.src='/static/html/home.html'      
+      this.src='static/html/home.html'      
   "></iframe>
   <h1 v-if="DEVELOPMENT" class="centered">
     <h1>DEVELOPMENT MODE</h1>
