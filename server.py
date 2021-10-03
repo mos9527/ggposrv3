@@ -159,7 +159,7 @@ if __name__ == '__main__':
         request.send_response(200)
         return {'host':'localhost','port':7000}
 
-    # logging.getLogger('PyWebHost').setLevel(logging.FATAL)
+    logging.getLogger('PyWebHost').setLevel(logging.FATAL)
     logging.info('READY : http://127.0.0.1:%d' % args.port)
     logging.info('        http://%s:%d' % (get_ip(),args.port))
     server.serve_forever()
