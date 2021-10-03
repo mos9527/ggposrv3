@@ -20,6 +20,9 @@ const Client = {
   },
   onWsOpen() {
     store.dispatch(CONNECT,Client.ws ? Client.ws.readyState : false)
+    setInterval(function(){ // TODO : Server should be doing ping-pongs instead
+      Client.ws.send('');
+    },10000)
   },
   onWsMessage(e) {
     /* parses incoming command by COMMAND and PAYLOAD */
