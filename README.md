@@ -1,8 +1,9 @@
 ggposrv3
 ==================================
 自己搭建 GGPO / Fightcade 私服！
-# 使用
-**注意：现行版本未实现内网穿透，玩家跨局域网联机需要异地组网**
+# 测试
+土豆服务器：[mos9527.tooo.top/ggpo](https://mos9527.tooo.top/ggpo)
+
 ## 私服客户端
 ### 配置
 - 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/releases)
@@ -40,7 +41,7 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
    - 同 FC 模拟器，可按 T 发送游戏内私信，支持中文
    - 该消息可由观战者及玩家所见，观战者**能**发送信息 (可能变动)
    - 一方退出模拟器将宣布挑战结束 （可能变动）   
-   - 可在比赛时使用 Lua 脚本，此时设计**修改内存**的函数将无法调用。 （可能变动）
+   - 可在比赛时使用 Lua 脚本，此时设计**修改内存**操作无效 （可能变动）
 
 此外 Web 界面跟随系统深色模式
 
@@ -48,22 +49,17 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
 ### 部署
 需要 Python 3.6 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
 - 如需日志，则还需 `pip install coloredlogs`
-- 若服务端与客户端在同一机器，确保客户端使用服务端的 LAN IP 访问
-- 暂时没有内网穿透能力；跨局域网游玩还需配置异地组网：如 OpenVPN，ZeroTier 或 Hamachi,向日葵等。此时客户端及服务端需要在同一网络内
 
 最后运行 server.py 即可
 
+		usage: server.py [-h] [--port PORT]
 
-    usage: server.py [-h] [--ggpo-port GGPO_PORT] [--client-port CLIENT_PORT]
+		GGPO Python3 Server
 
-    GGPO Python3 Server
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --ggpo-port GGPO_PORT
-                            GGPO portocol port
-      --client-port CLIENT_PORT
-                            HTTP/Websocket interface port
+		optional arguments:
+		  -h, --help   show this help message and exit
+		  --port PORT  HTTP port
+经测试，服务可接受 NGINX 反代
 
 ### 配置
 服务器**启动时**会从执行目录下读取这些文件作为配置：
