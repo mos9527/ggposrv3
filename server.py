@@ -2,11 +2,11 @@
 from argparse import ArgumentParser
 import logging
 from os import path
-import socket,threading,time
+import socket
 
 from pywebhost.handler import Request
 from pywebhost.modules import JSONMessageWrapper, WriteContentToRequest
-from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession, WebsocketSessionWrapper
+from pywebhost.modules.websocket import WebsocketSessionWrapper
 from ggpo import GGPOServer
 from ggpo.handlers.client import GGPOClientSession
 from ggpo.handlers.nexus import GGPONexusSession

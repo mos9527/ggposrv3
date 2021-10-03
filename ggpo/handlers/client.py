@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import traceback
-from enum import Enum
-from json import dumps,loads
-
 from logging import DEBUG, ERROR, INFO, WARN, WARNING, getLogger
+from json import dumps,loads
 from time import time
-
-from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
+from enum import Enum
 
 from ggpo.models.quark import allocate_quark, generate_new_ts, ts_from_quark
 from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes
 
+from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
 from threading import Lock
 
 class GGPOClientSession(WebsocketSession):
