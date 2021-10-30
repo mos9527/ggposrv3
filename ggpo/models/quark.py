@@ -9,11 +9,13 @@ class GGPOQuark(object):
         self.quark = quark
         self.p1 = None
         self.p2 = None
-        
+        # Player objects
         self.score = {'p1':0,'p2':0}
         self.characters = {'p1':'','p2':''}
-        
-        self.nexus_nodes = list()
+        # Scoring & misc
+        self.np1 = None
+        self.np2 = None
+        # Nexues nodes
         self.spectators = dict()
 
 class QuarkStorage(dict):

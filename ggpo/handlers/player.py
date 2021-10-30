@@ -76,7 +76,7 @@ class GGPOPlayerSession(WebsocketSession):
         return self.server.server_address[1]    
 
     def send(self,msg:Union[str,bytes]):
-        if type(msg) == str : msg = msg.encode()
+        if type(msg) == str : msg = msg.encode()        
         try:super().send(WebsocketFrame(OPCODE=2,PAYLOAD=msg))
         except:self.finish()
 
@@ -119,6 +119,15 @@ class GGPOPlayerSession(WebsocketSession):
         if self.server.quarks.hasquark(self.quark):
             return self.server.quarks[self.quark]
         return None
+    
+    @property
+    def is_p1(self):
+        return self.side == GGPOClientSide.PLAYER1
+
+    @property
+    def is_p2(self):
+        return self.side == GGPOClientSide.PLAYER2
+                
     # endregion
     # region Netcode interpreting
     def on_command(self,command,sequence,data,length):
@@ -251,7 +260,7 @@ class GGPOPlayerSession(WebsocketSession):
             return self.client.onMatchStatusUpdate()
         elif t_msg==b'W': # W - match complete with one party winning
             winner,s1,s2,c1,c2 = self.decode_from_gbk_b64(msg).split(',')
-            if (winner == '1' and self.side == GGPOClientSide.PLAYER1) or (winner == '2' and self.side == GGPOClientSide.PLAYER2):
+            if (winner == '1' and self.is_p1) or (winner == '2' and self.is_p2):
                 msg = self.encode_to_gbk_b64("回合结束 - P%s (%s) 获胜" % (winner,self.quarkobject.characters['p' + winner]))
             else:return
 
@@ -358,13 +367,13 @@ class GGPOPlayerSession(WebsocketSession):
             return self.finish()
         else:
             self.log('GETPEER : Found peer: %s [%s:%s <-> %s:%s]', peer, self.host,self.port,peer.host,peer.port)
-        if self.side==GGPOClientSide.PLAYER1 and quarkobject.p1==None:
+        if self.is_p1 and quarkobject.p1==None:
             quarkobject.p1=self
-        elif self.side==GGPOClientSide.PLAYER2 and quarkobject.p2==None:
+        elif self.is_p2 and quarkobject.p2==None:
             quarkobject.p2=self                    
         pdu=self.sizepad('127.0.0.1') # peer.host) # if not self.server.holepunch else '127.0.0.1')
         pdu+=self.pad2hex(9000) # peer.port)
-        if self.side==GGPOClientSide.PLAYER1:
+        if self.is_p1:
             pdu+=self.pad2hex(1)
         else:
             pdu+=self.pad2hex(0)
@@ -451,10 +460,12 @@ class GGPOPlayerSession(WebsocketSession):
                         player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method                        
                         player.finish()
                 self.log('... Removing quark %s',self.quark)
-                if self.quarkobject.nexus_nodes:
+                if self.quarkobject.np1 or self.quarkobject.np2:
                     self.log('... Dismantling nexus %s',self.quark)
-                    for node in self.quarkobject.nexus_nodes:
-                        node.close()                        
+                    if self.quarkobject.np1:
+                        self.quarkobject.np1.close()
+                    if self.quarkobject.np2:
+                        self.quarkobject.np1.close()
                 self.server.quarks.pop(self.quark) # the quark is gone
                 # Notify the client(s),which will then revert the states
             if self.client:self.client.onEmulatorDisconnect()
