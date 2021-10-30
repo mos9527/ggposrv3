@@ -3,7 +3,6 @@ from typing import Union
 from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
 from ggpo.models.quark import GGPOQuark
 from logging import ERROR, getLogger,DEBUG
-
 class GGPONexusSession(WebsocketSession):
     quark = None
 
@@ -30,16 +29,20 @@ class GGPONexusSession(WebsocketSession):
         self.quark = self.request.query['quark'][-1]
         if not self.server.quarks.hasquark(self.quark):
             self.server.quarks[self.quark] = GGPOQuark(self.quark)                 
-        if not self.quarkobject.np1: 
+        if self.quarkobject.np1 == None: 
             self.quarkobject.np1 = self
             self.is_p1 = True
-        elif not self.quarkobject.np2:
+            self.log('As P1')
+        elif self.quarkobject.np2 == None:
             self.quarkobject.np2 = self
-            self.is_p1 = False
+            self.is_p1 = False            
+            self.log('As P2')
         else:
             self.log('In a full quark',level=ERROR)
             return self.close()                       
-        self.log("Joinied to quark. ")
+        # responding with handshake message
+        self.send('SVHLO_P%d' % (1 + int(self.is_p2)))
+        self.log("Joinied to quark. ")        
 
     def onClose(self, request=None, content=None):             
         if self.quark:               
@@ -57,7 +60,7 @@ class GGPONexusSession(WebsocketSession):
             target = self.quarkobject.np2
         elif self.is_p2:
             target = self.quarkobject.np1
-        target = target or self # Fallback to echo packets when no other client is present
+        target = target if target != None else self # Fallback to echo packets when no other client is present
         target.send(WebsocketFrame(PAYLOAD=frame,OPCODE=2))  
 
     def __eq__(self, o: object) -> bool:
