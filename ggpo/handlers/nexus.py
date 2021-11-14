@@ -41,9 +41,9 @@ class GGPONexusForwarder(Thread):
             quarkobject = self.quarks[quark]
             # Get quark by TS, which is shared across all the participants
             if not addr in quarkobject.routes:
-                self.logger.debug('ACCEPT Quark %s from %s (%d/%d)' % (ts_from_quark(quark),addr,len(quarkobject.routes),self.min_routes))
-                self.fd.sendto(RESP_OK,addr) 
                 quarkobject.routes[addr] = quark
+                self.logger.debug('ACCEPT Quark %s from %s (%d/%d)' % (ts_from_quark(quark),addr,len(quarkobject.routes),self.min_routes))
+                self.fd.sendto(RESP_OK,addr)                 
             
             if len(quarkobject.routes) >= self.min_routes:
                 # Let occupants know each other's IP/Addr pairs
