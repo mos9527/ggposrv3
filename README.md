@@ -2,7 +2,7 @@ ggposrv3
 ==================================
 自己搭建 GGPO / Fightcade 私服！
 # 测试
-土豆服务器：[mos9527.tooo.top/ggpo](https://mos9527.tooo.top/ggpo)
+土豆服务器：[82.157.64.153:7000](http://82.157.64.153:7000/)
 
 ## 私服客户端
 ### 配置
@@ -52,14 +52,15 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
 
 最后运行 server.py 即可
 
-		usage: server.py [-h] [--port PORT]
+      usage: server.py [-h] [--port PORT]
 
-		GGPO Python3 Server
+      GGPO Python3 Server
 
-		optional arguments:
-		  -h, --help   show this help message and exit
-		  --port PORT  HTTP port
-经测试，服务可接受 NGINX 反代
+      options:
+      -h, --help   show this help message and exit
+      --port PORT  HTTP/TCP/UDP port
+
+服务单口复用，请务必配置防火墙以允许 UDP/TCP 同时通行
 
 ### 配置
 服务器**启动时**会从执行目录下读取这些文件作为配置：
@@ -94,13 +95,3 @@ UI 设计很大程度上参考了 Fightcade 的设计；下图将尝试解释客
 [poliva/ggposrv - GGPO Tcp协议逆向](https://github.com/poliva/ggposrv)
 
 还有在从 PoC 坚持到现在帮忙测试的朋友们 👍
-
-# LICENSE
-GPL-2.0
-
-# Copyright..?
-      JoJo's Bizarre Adventure : Heritage For The Future is owned by Capcom (C). The assest used 
-      in this project complies the "fair use" doctirne and were not used to gain financial profits.
-
-      You may freely distribute, share, or modify cotents of this project.However does not guarantee
-      liablity or warrenty. See LICENSE for more info.
