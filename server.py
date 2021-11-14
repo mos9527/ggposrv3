@@ -9,8 +9,8 @@ from pywebhost.modules import JSONMessageWrapper, WriteContentToRequest
 from pywebhost.modules.websocket import WebsocketSessionWrapper
 from ggpo import GGPOServer
 from ggpo.handlers.client import GGPOClientSession
-from ggpo.handlers.nexus import GGPONexusSession
 from ggpo.handlers.player import GGPOPlayerSession
+from ggpo.handlers.nexus import GGPONexusForwarder
 from ggpo.models.quark import ts_from_quark
 
 try:
@@ -34,7 +34,7 @@ def get_ip():
 
 if __name__ == '__main__':
     argparse = ArgumentParser(description='GGPO Python3 Server')
-    argparse.add_argument('--port',help='HTTP port',default=7000,type=int)
+    argparse.add_argument('--port',help='HTTP/TCP/UDP port',default=7000,type=int)    
     args = argparse.parse_args()
     
     server = GGPOServer()
@@ -112,11 +112,6 @@ if __name__ == '__main__':
     def websocket(initator, request: Request, content):
         return GGPOClientSession
 
-    @server.route('/nexus')
-    @WebsocketSessionWrapper()
-    def websocket2(initator, request: Request, content):
-        return GGPONexusSession
-
     @server.route('/ggpo')
     @WebsocketSessionWrapper()
     def websocket3(initator, request: Request, content):
@@ -125,4 +120,7 @@ if __name__ == '__main__':
     logging.getLogger('PyWebHost').setLevel(logging.FATAL)
     logging.info('READY : http://127.0.0.1:%d' % args.port)
     logging.info('        http://%s:%d' % (get_ip(),args.port))
+    logging.info('        udp://%s:%d' % (get_ip(),args.port))
+    udp_handler = GGPONexusForwarder(server=server,port=args.port)
+    udp_handler.start()
     server.serve_forever()

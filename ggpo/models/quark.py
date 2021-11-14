@@ -6,16 +6,15 @@ from threading import Lock
 class GGPOQuark(object):
     """Object representing a GGPO quark: an ongoing match that can be spectated."""
     def __init__(self, quark):
-        self.quark = quark
+        self.quark_ts = ts_from_quark(quark)
         self.p1 = None
         self.p2 = None
         # Player objects
         self.score = {'p1':0,'p2':0}
         self.characters = {'p1':'','p2':''}
         # Scoring & misc
-        self.np1 = None
-        self.np2 = None
-        # Nexues nodes
+        self.routes = dict()
+        # UDP IP:Port mapping
         self.spectators = dict()
 
 class QuarkStorage(dict):
@@ -60,6 +59,7 @@ def allocate_quark(ts):
 def _create_file(fn):
     os.makedirs(os.path.dirname(fn),exist_ok=True)
     return Path(fn).touch()
+
 def _quark_fn(ts,gamebuffer=False,savestate=False):
     if gamebuffer:typeof = 'gamebuffer'
     if savestate:typeof = 'savestate'

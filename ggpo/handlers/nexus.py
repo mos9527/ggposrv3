@@ -1,70 +1,55 @@
-# -*- coding: utf-8 -*-
-from typing import Union
-from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
-from ggpo.models.quark import GGPOQuark
-from logging import ERROR, getLogger,DEBUG
-class GGPONexusSession(WebsocketSession):
-    quark = None
+from threading import Thread
+import socket,struct,logging
 
-    @property
-    def quarkobject(self):
-        return self.server.quarks[self.quark]
+from ggpo import GGPOServer
+from ggpo.models.quark import ts_from_quark
 
-    @property
-    def is_p2(self):
-        return not self.is_p1
+RESP_OK = b'\x00\x00\x00\x00'
+RESP_REJCT = b'\xff\xff\xff\xfe'
+RESP_SYNC = b'\xff\xff\xff\xff'
+
+class GGPONexusForwarder(Thread):
+    def __init__(self,server:GGPOServer,port=10000):
+        super().__init__()
+        self.server = server
+
+        self.fd = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.fd.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.fd.bind(('',port))
+        self.keep_alive = True
         
-    def __init__(self, request, raw_frames=True, *a, **k):
-        from ggpo import GGPOServer                  
-        super().__init__(request, raw_frames=raw_frames, *a, **k)
-        self.server : GGPOServer  = self.request.server            
-        self.logger = getLogger('GGPONexusNode')
-        self.is_p1 = False
+        self.logger = logging.getLogger('Nexus')
 
-    def log(self,msg,*args,level=DEBUG):
-        header = '\033[1m{%s} \033[0m' % self
-        self.logger.log(level,header+msg,*args)      
+        self.min_routes = 2                
+        self.daemon = True
 
-    def onOpen(self, request=None, content=None):                
-        self.quark = self.request.query['quark'][-1]
-        if not self.server.quarks.hasquark(self.quark):
-            self.server.quarks[self.quark] = GGPOQuark(self.quark)                 
-        if self.quarkobject.np1 == None: 
-            self.quarkobject.np1 = self
-            self.is_p1 = True
-            self.log('As P1')
-        elif self.quarkobject.np2 == None:
-            self.quarkobject.np2 = self
-            self.is_p1 = False            
-            self.log('As P2')
-        else:
-            self.log('In a full quark',level=ERROR)
-            return self.close()                       
-        # responding with handshake message
-        self.send('SVHLO_P%d' % (1 + int(self.is_p2)))
-        self.log("Joinied to quark. ")        
+    @property
+    def quarks(self):
+        return self.server.quarks
 
-    def onClose(self, request=None, content=None):             
-        if self.quark:               
-            if request: return                   
-            self.log("Leaving current quark game")
-            if self.is_p1:
-                self.quarkobject.np1 = None
-            elif self.is_p2:
-                self.quarkobject.np2 = None                        
+    def run(self):        
+        while self.keep_alive:
+            data,addr = self.fd.recvfrom(256)            
+            # The client is expected to send a valid quark which is accessible from the server quark store
+            quark = data.decode()
+            # Since the Client object will always create the quark first, expect the quark to be here already
+            if not self.quarks.hasquark(quark):
+                self.logger.warning('REJECT Quark %s - Not found' % ts_from_quark(quark))
+                self.fd.sendto(RESP_REJCT,addr)
+                continue
+            
+            quarkobject = self.quarks[quark]
+            # Get quark by TS, which is shared across all the participants
+            if not addr in quarkobject.routes:
+                self.logger.debug('ACCEPT Quark %s from %s (%d/%d)' % (ts_from_quark(quark),addr,len(quarkobject.routes),self.min_routes))
+                self.fd.sendto(RESP_OK,addr) 
+                quarkobject.routes[addr] = quark
+            
+            if len(quarkobject.routes) >= self.min_routes:
+                # Let occupants know each other's IP/Addr pairs
+                for target in quarkobject.routes:                    
+                    for addr in quarkobject.routes:
+                        if target != addr:
+                            self.fd.sendto(RESP_SYNC + socket.inet_aton(addr[0]) + struct.pack('<H',addr[1]),target)
+                            self.logger.info('SYNC Quark %s : %s <-> %s' % (ts_from_quark(quark),target,addr))                
     
-    def onReceive(self, frame: Union[bytearray, WebsocketFrame]):
-        # sends data to the other player upon receive
-        target = None
-        if self.is_p1:
-            target = self.quarkobject.np2
-        elif self.is_p2:
-            target = self.quarkobject.np1
-        target = target if target != None else self # Fallback to echo packets when no other client is present
-        target.send(WebsocketFrame(PAYLOAD=frame,OPCODE=2))  
-
-    def __eq__(self, o: object) -> bool:
-        return id(self) == id(o)
-
-    def __repr__(self) -> str:
-        return '%s - nexus - P%s' % (self.quark,1 + int(self.is_p2))

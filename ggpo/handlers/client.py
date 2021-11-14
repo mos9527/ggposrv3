@@ -5,7 +5,7 @@ from json import dumps,loads
 from time import time
 from enum import Enum
 
-from ggpo.models.quark import allocate_quark, generate_new_ts, ts_from_quark
+from ggpo.models.quark import GGPOQuark, allocate_quark, generate_new_ts, ts_from_quark
 from ggpo.handlers import GGPOClientStatus, GGPOClientSide, GGPOCommand , GGPOClientErrorcodes
 
 from pywebhost.modules.websocket import WebsocketFrame, WebsocketSession
@@ -256,10 +256,12 @@ class GGPOClientSession(WebsocketSession):
         ts = generate_new_ts()
         self.quark = allocate_quark(ts=ts)
         peer.quark = allocate_quark(ts=ts)
+        if not self.server.quarks.hasquark(self.quark):
+            self.server.quarks[self.quark] = GGPOQuark(self.quark)
         # being challenged, become P2
         self.side = GGPOClientSide.PLAYER2
         peer.side = GGPOClientSide.PLAYER1
-        # gaming time >:]
+
         self.status = GGPOClientStatus.PLAYING
         peer.status = GGPOClientStatus.PLAYING
         # the quark is ready

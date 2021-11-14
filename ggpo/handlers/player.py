@@ -459,22 +459,17 @@ class GGPOPlayerSession(WebsocketSession):
                         # player.send(b'\xff\xff\x00\x00\xde\xad') # crashes via buffer overflow, should cause AV
                         player.send_sysmessage(GGPOSysMessage.CLIENT_LEFT) # a cleaner method                        
                         player.finish()
-                self.log('... Removing quark %s',self.quark)
-                if self.quarkobject.np1 or self.quarkobject.np2:
-                    self.log('... Dismantling nexus %s',self.quark)
-                    if self.quarkobject.np1:
-                        self.quarkobject.np1.close()
-                    if self.quarkobject.np2:
-                        self.quarkobject.np1.close()
-                self.server.quarks.pop(self.quark) # the quark is gone
+                self.log('... Removing quark %s',self.quark)                
                 # Notify the client(s),which will then revert the states
-            if self.client:self.client.onEmulatorDisconnect()
+            if self.client:
+                self.client.onEmulatorDisconnect()
 
         if self.clienttype==GGPOClientType.SPECTATOR:
             # this client is an spectator
             self.log("... Spectator leaving quark %s" , self.quark)
             self.spectator_leave(self.quark)
-            if self.client:self.client.onEmulatorDisconnect()
+            if self.client:
+                self.client.onEmulatorDisconnect()
 
         players = self.server.players
         if self in players:
