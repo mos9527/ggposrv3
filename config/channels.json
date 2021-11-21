@@ -3,15 +3,5 @@
         "name":"jjbahftf",
         "rom":"jojobanr1",
         "desc":"未来遗产"
-    },
-    {
-        "name":"jjbahftf_rc",
-        "rom":"jojobanrc",
-        "desc":"未来遗产 - RC 版"
-    },    
-    {
-        "name":"kof97_1",
-        "rom":"kof97",
-        "desc":"拳皇 97 - KING OF FIGHTERS 97'"
     }
 ]
