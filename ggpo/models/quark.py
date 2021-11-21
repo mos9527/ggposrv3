@@ -14,7 +14,7 @@ class GGPOQuark(object):
         self.characters = {'p1':'','p2':''}
         # Scoring & misc
         self.routes = dict()
-        # UDP IP:Port mapping
+        # UDPSession dict
         self.spectators = dict()
 
 class QuarkStorage(dict):

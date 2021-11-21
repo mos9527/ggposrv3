@@ -10,7 +10,7 @@ from pywebhost.modules.websocket import WebsocketSessionWrapper
 from ggpo import GGPOServer
 from ggpo.handlers.client import GGPOClientSession
 from ggpo.handlers.player import GGPOPlayerSession
-from ggpo.handlers.nexus import GGPONexusForwarder
+from ggpo.handlers.nexus import GGPOGenericSTUNServer
 from ggpo.models.quark import ts_from_quark
 
 try:
@@ -121,6 +121,6 @@ if __name__ == '__main__':
     logging.info('READY : http://127.0.0.1:%d' % args.port)
     logging.info('        http://%s:%d' % (get_ip(),args.port))
     logging.info('        udp://%s:%d' % (get_ip(),args.port))
-    udp_handler = GGPONexusForwarder(server=server,port=args.port)
+    udp_handler = GGPOGenericSTUNServer(server=server,port=args.port)
     udp_handler.start()
     server.serve_forever()
