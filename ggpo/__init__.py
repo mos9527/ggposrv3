@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
 from os import path
+import socket
 from struct import pack, unpack
 from pywebhost import PyWebHost
 
@@ -101,6 +102,7 @@ class GGPOServer(PyWebHost):
 
     def bind_and_active(self,address_tuple):
         super().__init__(address_tuple)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return True
 
     def boardcast(self,to,*args):
