@@ -102,7 +102,7 @@ class GGPOServer(PyWebHost):
 
     def bind_and_active(self,address_tuple):
         super().__init__(address_tuple)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.allow_reuse_address = True
         return True
 
     def boardcast(self,to,*args):
