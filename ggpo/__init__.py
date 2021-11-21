@@ -2,6 +2,7 @@
 from logging import getLogger
 from os import path
 import socket
+import socketserver
 from struct import pack, unpack
 from pywebhost import PyWebHost
 
@@ -101,8 +102,8 @@ class GGPOServer(PyWebHost):
         return None
 
     def bind_and_active(self,address_tuple):
-        super().__init__(address_tuple)
-        self.allow_reuse_address = True
+        socketserver.TCPServer.allow_reuse_address = True
+        super().__init__(address_tuple)        
         return True
 
     def boardcast(self,to,*args):
