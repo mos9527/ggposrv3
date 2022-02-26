@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from threading import Thread
 import time
 if not hasattr(time, 'time_ns'): # for Py3.6
     time.time_ns = lambda: int(time.time() * 1e9)
@@ -17,12 +18,13 @@ from ggpo.handlers.player import GGPOPlayerSession
 from ggpo.handlers.nexus import GGPOGenericSTUNServer
 from ggpo.models.quark import ts_from_quark
 
-try:
+try:    
     import coloredlogs
     coloredlogs.DEFAULT_LOG_FORMAT = '%(asctime)s [%(levelname).1s] %(name)s %(message)s'
     coloredlogs.install(level=0)
 except:
-    print('WARNING: coloredlogs is not installed!')
+    logging.getLogger().setLevel(0)
+    print('WARNING: coloredlogs is not installed. Using default logger.')
 
 def get_ip():
     # https://stackoverflow.com/questions/166506/finding-local-ip-addresses-using-pythons-stdlib
@@ -107,12 +109,13 @@ if __name__ == '__main__':
     def sound_static(initator, request: Request, content):                
         WriteContentToRequest(request,'./sounds/'+ request.path.split('/sounds/')[-1] + '.wav',mime_type='audio/wav')
 
-    @server.route('/home')
+    @server.route('/home.*')
     @allow_cors
     def home(initator, request: Request, content):
-        if not path.isfile('./home/index.html'):
-            return request.send_error(404)
-        return WriteContentToRequest(request,'./home/index.html',mime_type='text/html; charset=UTF-8')
+        if request.path == '/home' or request.path == '/home/':
+            return WriteContentToRequest(request,'./home/index.html',mime_type='text/html; charset=UTF-8')
+        else:
+            WriteContentToRequest(request,'.' + request.path,partial_acknowledge=True)
 
     @server.route('/ws')
     @WebsocketSessionWrapper()
@@ -125,9 +128,13 @@ if __name__ == '__main__':
         return GGPOPlayerSession
 
     logging.getLogger('PyWebHost').setLevel(logging.INFO)
-    logging.info('READY : http://127.0.0.1:%d' % args.port)
-    logging.info('        http://%s:%d' % (get_ip(),args.port))
-    logging.info('        udp://%s:%d' % (get_ip(),args.port))
+    logging.info('SERVING : http://127.0.0.1:%d' % args.port)
+    logging.info('          http://%s:%d' % (get_ip(),args.port))
+    logging.info('          udp://%s:%d' % (get_ip(),args.port))    
     udp_handler = GGPOGenericSTUNServer(server=server,port=args.port)
     udp_handler.start()
-    server.serve_forever()
+    tServer = Thread(target=server.serve_forever,name="GGPOTCP",daemon=True)
+    tServer.start()
+    # The main thread spawns an interactive terminal for more administrative operations
+    from code import interact
+    interact(banner='* Console is now ready (Press Ctrl+D to exit).',local=locals())

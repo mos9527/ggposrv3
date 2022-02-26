@@ -42,7 +42,7 @@ class UDPSession:
 
 class GGPOGenericSTUNServer(Thread):
     def __init__(self,server:GGPOServer,port=10000):
-        super().__init__()
+        super().__init__(name="GGPOUDP")
         self.server = server
 
         self.fd = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)

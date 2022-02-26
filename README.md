@@ -1,6 +1,6 @@
 ggposrv3
 ==================================
-自己搭建 GGPO / Fightcade 私服！
+自己搭建 GGPO / Fightcade 私服.
 # 测试
 土豆服务器：[82.157.64.153:7000](http://82.157.64.153:7000/)
 
@@ -9,7 +9,7 @@ ggposrv3
 - 下载 [moscade-fbneo](https://github.com/greats3an/moscade-fbneo/releases)
 ## 服务端
 ### 部署
-需要 Python 3.6 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
+需要 Python 3.6+ 环境。安装[依赖](https://github.com/greats3an/pywebhost) : `pip install pywebhost`
 - 如需日志，则还需 `pip install coloredlogs`
 
 最后运行 server.py 即可
@@ -27,12 +27,12 @@ ggposrv3
 ### 配置
 服务器**启动时**会从执行目录下读取这些文件作为配置：
 - `config/channels.json` - 可选？；若存在，则读取作为频道列表。格式：
-可参考 [channels.json](https://github.com/greats3an/ggposrv3/blob/master/ggpo/config/channels.json)
+可参考 [channels.json](https://github.com/greats3an/ggposrv3/blob/master/config/channels.json)
 
 		{
 		 [
 		  {
-			"name":"频道名称（不建议非 ASCII 字符）",
+			"name":"频道名称",
 			"desc":"频道说明（显示在列表上）",
 			"rom":"游戏 ROM 名",
 	          },{ ...		  
