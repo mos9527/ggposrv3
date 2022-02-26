@@ -127,7 +127,7 @@ if __name__ == '__main__':
     def websocket3(initator, request: Request, content):
         return GGPOPlayerSession
 
-    logging.getLogger('PyWebHost').setLevel(logging.INFO)
+    logging.getLogger('PyWebHost').setLevel(logging.CRITICAL)
     logging.info('SERVING : http://127.0.0.1:%d' % args.port)
     logging.info('          http://%s:%d' % (get_ip(),args.port))
     logging.info('          udp://%s:%d' % (get_ip(),args.port))    

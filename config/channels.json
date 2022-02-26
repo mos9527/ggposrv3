@@ -2,11 +2,16 @@
     {
         "name":"jjbahftf",
         "rom":"jojobanr1",
-        "desc":"未来遗产"
+        "desc":"未来遗产 | ジョジョの奇妙な冒険 未来への遺産 (CPS-III,NO CD)"
     },
     {
         "name":"mslug3",
         "rom":"mslug3h",
-        "desc":"合金弹头 3 (NGH-2560)"
+        "desc":"合金弹头 3 | METAL SLUG 3 (NGH-2560,NEOGEO)"
+    },
+    {
+        "name":"kof97",
+        "rom":"kof97",
+        "desc":"拳皇 97 | KING OF FIGHTERS 97' (NGH-2320,NEOGEO)"
     }
 ]

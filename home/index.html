@@ -7,7 +7,7 @@
   <title>no no no you've dug too deep into this site</title>
   <style>
     * {
-      font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+      font-family:monospace;
     }
 
     body {
@@ -17,8 +17,8 @@
       color: whitesmoke;
     }
 
-    h1,code,a{
-      background-color: #0f0f0f;
+    code,a{
+      background-color: #555555;
       border-radius: 3px;
     }
 
@@ -29,42 +29,25 @@
 </head>
 
 <body>
-  <h1>MOSCade - 使用说明</h1>
+  <h1>联机说明</h1>
   <div>
-    <p>在开始联机之前，请先准备好你的模拟器资源</p>
-    <h2>MOSCadeFBNeo</h2>
-    <p>下载链接：<a href="http://mos9527.tooo.top/public/MOSCade/release.zip">release.zip</a></p>
-    <p>请解压后运行 <code>moscadefbneo.exe</code> 一次，完成所提示的配置。</p>
-    <h2>ROM 资源</h2>
+    <p>若未准备模拟器，请务必完成以下步骤</p>
+    <h2>下载 MOSCadeFBNeo</h2>
+    <p>下载链接：<a href="home/release.zip">release.zip</a></p>        
+    <h2>模拟器配置</h2>
     <ul>
-      <li>以下 ROM 需要在进行联机前下载完毕并复制在 <code>[模拟器目录]\roms</code> 文件夹下</li>
-      <li>可在进入某一频道后在标题处看到自己所需的 ROM 名。</li>
+      <li>解压<b>（切忌直接从压缩包运行）</b>后运行文件夹中 <code>moscadefbneo.exe</code>，完成所提示的配置</li>
+      <li>（可选）运行 <code>moscadefbneo.exe</code> 并从 <code>游戏→最近载入的游戏</code> 中选择游戏，可按 F5 配置键位（或 <code>输入</code>→<code>修改按键绑定</code>）</li>
+      <li>（可选）此外 <code>画面</code>→<code>管理 MOSCade 选项</code> 还提供了如 <code>显示玩家输入</code> 的选项，还请自行摸索</li>
     </ul>
-    <h3>JOJO的奇妙冒险 — 未来遗产</h3>
+    <h2>联机</h2>
+    <p>在页面底部选择 <code>登录</code> 并输入用户名后（请无视密码栏）即可登。之后可在 <code>频道</code> 页面找到各游戏频道，进入后方可选择其他已进入的玩家进行挑战</p>    
     <ul>
-      <li>
-        <p><a href="http://mos9527.tooo.top/public/MOSCade/roms/jojoba/jojobanr1.zip">jojobanr1</a></p>
-        <ul>
-          <li>990913 （老日版）ROM，为FIGHTCADE和游聚所用</li>
-        </ul>
-      </li>
-      <li>
-        <p><a href="http://mos9527.tooo.top/public/MOSCade/roms/jojoba/jojobanrc.zip">jojobanrc</a></p>
-        <ul>
-          <li>魔改 ROM，添加了 ROMAN CANCEL / RC ，即一键断连</li>
-          <li>该操作需额外配置键位，载入游戏后按 F5 配置 P1/P2 Roman Cancel</li>
-          <li>断连操作耗 1 气，此后可接任意连</li>
-        </ul>
-      </li>
+      <li><b>注意：</b>联机玩家每一方都需完成上述<b>模拟器配置</b>项</li>
+      <li><b>不要关闭</b>浏览器页面。联机状态同步于浏览器连接状态</li>        
     </ul>
-    <h2>配置</h2>
-    <ul>
-      <li>运行 <code>moscadefbneo.exe</code> 并载入游戏，可按 F5 配置键位（或 <code>输入</code>→<code>修改按键绑定</code>）</li>
-      <li>此外 <code>画面</code>→<code>管理 MOSCade 选项</code> 还提供了如 <code>显示玩家输入</code> 的选项，还请试着调整</li>
-    </ul>
-    <h2>连接</h2>
-    <p>在本页选择 <code>登录</code> 并输入信息后（目前随便输个用户名，密码无所谓🤨），可在 <code>频道</code> 页面找到各游戏频道，进入后可选中玩家进行挑战</p>
-    <p>玩家不需要在同一局域网</p>
+    <hr></hr>
+    <i>Licensed under GPL-2.0. mos9527 2021-2022 All Rights Reserved.</i>
   </div>
 </body>
 
