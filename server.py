@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import time
+if not hasattr(time, 'time_ns'): # for Py3.6
+    time.time_ns = lambda: int(time.time() * 1e9)
+
 from argparse import ArgumentParser
 import logging
 from os import path
@@ -85,7 +89,10 @@ if __name__ == '__main__':
     @server.route('/banners/.*')
     @allow_cors
     def banners_static(initator, request: Request, content):
-        return WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1]+'.mp4',mime_type='video/mp4')
+        try:
+            WriteContentToRequest(request,'./banners/'+ request.path.split('/banners/')[-1] + '.png',mime_type='image/png')
+        except:
+            WriteContentToRequest(request,'./banners/default.png',mime_type='image/png')
 
     @server.route('/portraits/.*')
     @allow_cors
@@ -117,7 +124,7 @@ if __name__ == '__main__':
     def websocket3(initator, request: Request, content):
         return GGPOPlayerSession
 
-    logging.getLogger('PyWebHost').setLevel(logging.FATAL)
+    logging.getLogger('PyWebHost').setLevel(logging.INFO)
     logging.info('READY : http://127.0.0.1:%d' % args.port)
     logging.info('        http://%s:%d' % (get_ip(),args.port))
     logging.info('        udp://%s:%d' % (get_ip(),args.port))

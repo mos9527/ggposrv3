@@ -58,7 +58,7 @@ ul::-webkit-scrollbar {display: none;}
     z-index: 0;
     top: 50%;left: 0;
     transform: translate(0,-50%);
-    width: 100%;        
+    width: 100%;           
 }
 
 .hero-content{
@@ -87,4 +87,7 @@ ul::-webkit-scrollbar {display: none;}
     top: 50%;
     max-width: 12vw;        
     transform: translate(0,-50%);
+}
+textarea:hover{
+    height: 8em;
 }

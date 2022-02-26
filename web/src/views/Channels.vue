@@ -2,16 +2,16 @@
   <v-container class="pa-8" fluid>
     <h1 class="mb-5">{{ $t('title-channels') }}</h1>
       <v-row v-for="channel in channels" :key="channel.name">
-        <v-card style="width:100%;margin-top:1vh;z-index:2;overflow:hidden;height:30vh" :to="'/channel/?name=' + channel.name">
-          <video
+        <v-card style="width:100%;margin-top:1vh;z-index:2;overflow:hidden;height:10vh" :to="'/channel/?name=' + channel.name">
+          <img
             :src="DEVELOPMENT ? '' : 'banners/' + channel.name"
-            class="hero-video" autoplay loop muted
+            class="hero-video" autoplay loop muted 
           >  
-           <!-- No video banners will be loaded when in development -->
-          </video>
+           <!-- No banners will be loaded when in development -->          
+           <!-- also using videos for this purpose is REALLY stupid...not again -->
           <v-container class="hero-content">
-            <span class="float-left ma-4 mt-9 headline font-weight-bold" style="position:absolute" >{{channel.desc}}</span>
-            <v-chip :key="channelsUpdate" class="ma-4 mt-9 float-right" :color="channel_current == channel.name ? 'red' : 'primary'" label text-color="white">
+            <span class="float-left mt-5 headline font-weight-bold" style="position:absolute" >{{channel.desc}}</span>
+            <v-chip :key="channelsUpdate" class="mt-5 float-right" :color="channel_current == channel.name ? 'red' : 'primary'" label text-color="white">
                 {{ $t('channels-online-player-count', [channel.online]) }}
             </v-chip>            
           </v-container>

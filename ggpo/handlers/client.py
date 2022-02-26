@@ -14,7 +14,7 @@ from threading import Lock
 class GGPOClientSession(WebsocketSession):
 
     def log(self, msg, *args, level=DEBUG):
-        header = '\033[1m[%s] \033[0m' % self
+        header = '[%s]' % self
         self.logger.log(level, header+msg, *args)
 
     def reply(self, command : GGPOCommand, payload):

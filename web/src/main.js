@@ -3,7 +3,7 @@ import Vue from 'vue'
 import vuexI18n from 'vuex-i18n';
 import { Store } from 'vuex'
 
-/* ChatS  croll */
+/* Chat scrolling */
 import VueChatScroll from 'vue-chat-scroll'
 Vue.use(VueChatScroll)
 /* i18n */

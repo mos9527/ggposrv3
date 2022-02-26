@@ -47,7 +47,7 @@ class GGPOPlayerSession(WebsocketSession):
                 
     # region Utility
     def log(self,msg,*args,level=DEBUG):
-        header = '\033[1m<%s> \033[0m' % self
+        header = '<%s>' % self
         self.logger.log(level,header+msg,*args)              
     @staticmethod
     def to_base64(v):

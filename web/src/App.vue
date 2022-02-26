@@ -8,7 +8,7 @@
         <router-view></router-view>
       </v-container>
       <v-footer app>
-        <v-container style="display: flex">
+        <v-bottom-navigation grow horizontal style="height:auto;width:100%;background-color:transparent;box-shadow:none">
           <v-btn style="flex: 1" v-if="DEVELOPMENT || !authenticated" to="/login">
             <v-icon>mdi-account</v-icon> {{ $t("title-login") }}
           </v-btn>
@@ -18,7 +18,7 @@
           <v-btn style="flex: 1" v-if="DEVELOPMENT || authenticated" to="/channels">
             <v-icon>mdi-controller-classic</v-icon> {{ $t("title-channels") }}
           </v-btn>
-        </v-container>
+        </v-bottom-navigation >
       </v-footer>
     </v-main>
     <div

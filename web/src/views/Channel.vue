@@ -22,7 +22,7 @@
     </v-slide-group>
     <v-divider></v-divider>
     <!-- Chat container -->
-    <ul style="height: calc(100vh - 272px); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
+    <ul style="height: calc(80vh - 5em); overflow: scroll ; overflow-x: hidden;" v-chat-scroll="{always: false, smooth: true, notSmoothOnInit: true}">
       <li class="chat pa-0 mt-0" v-for="chat in chats" :key="chat.ts">
         <!-- MESSAGE chat card -->
         <v-container
@@ -33,7 +33,9 @@
             {{ chat.sender ? chat.sender : chat.username }} {{ chat.isPM ? `→ ${chat.recipient}` : ""
             }}<small class="ml-2">{{ Utils.getDateString(chat.ts) }}</small>
           </div>
-          <div class="pl-3 text--primary">{{ chat.message }}</div>
+          <div class="pl-3 text--primary">
+            <pre>{{ chat.message }}</pre>
+          </div>
         </v-container>
         <!-- CHALLENGE chat card -->
         <v-container :key="challengeUpdateKey" v-if="chat.isChallenge" :class="challenge_available[chat.username] ? 'chat-emphasize-2' : 'chat-emphasize-1'">
@@ -87,7 +89,7 @@
           <v-spacer></v-spacer>
         </v-toolbar>
         <v-subheader>{{ $t('chat-private-message') }}</v-subheader>
-        <v-text-field class="pl-4 pr-4 mt-0" v-model="messagePM"></v-text-field>
+        <v-textarea class="pl-4 pr-4 mt-0" v-model="messagePM"></v-textarea>
         <v-container class="text-center">
           <v-btn
             style="width: 50%"
@@ -128,12 +130,14 @@
       </v-card>
     </v-dialog>
 
-    <v-container height="72" style="position:fixed;bottom:72px">
-      <v-text-field
-        :placeholder="$t('chat-channel-message') + ' [Enter]' "
+    <v-container style="position:fixed;bottom:72px">
+      <v-textarea
+        :placeholder="$t('chat-channel-message') + ' [Ctrl+Enter]' "
         v-model="message"
-        @keydown.enter="send()"
-      ></v-text-field>      
+        v-on:keypress.ctrl.enter="send()"
+        style="background-color:rgba(255,255,255,0.5)"
+        rows="1"
+      ></v-textarea>      
     </v-container>
   </v-container>
 </template>
