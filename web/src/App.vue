@@ -39,6 +39,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { DEVELOPMENT } from "./common/config"
+import { AUTH } from "./store/actions.local";
 export default {
   data:()=>({
     'DEVELOPMENT':DEVELOPMENT,    
@@ -51,5 +52,9 @@ export default {
       // ...
     ]),
   },
+  mounted(){
+    if (DEVELOPMENT)
+      this.$store.dispatch(AUTH, { username: Date.now().toString(36) , password:'GGPOSRV3Development' })    
+  }
 };
 </script>

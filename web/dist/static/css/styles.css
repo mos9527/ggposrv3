@@ -88,6 +88,8 @@ ul::-webkit-scrollbar {display: none;}
     max-width: 12vw;        
     transform: translate(0,-50%);
 }
-textarea:hover{
-    height: 8em;
+textarea{
+    transition:all 1s ease-in-out;
+    overflow: hidden;
+    max-height: 1em;
 }

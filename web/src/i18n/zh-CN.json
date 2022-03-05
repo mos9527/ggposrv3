@@ -47,7 +47,8 @@
   "title-channel": "{0}",
   "title-challenge": "{0} vs {1}",
   "prompt-login":"登陆 {0}",
-  "prompt-challenge":"究極鬥技 · 改",
-  "prompt-incoming-challenge":"速速来战！",
-  "prompt-incoming-challenge-canceled":"挑战已取消"
+  "prompt-challenge":"究極鬥技",
+  "prompt-incoming-challenge":"发起挑战",
+  "prompt-incoming-challenge-canceled":"挑战已取消",
+  "channel-test-play":"单机启动"
 }

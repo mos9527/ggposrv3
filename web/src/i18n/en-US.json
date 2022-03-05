@@ -49,5 +49,6 @@
     "prompt-login":"Login to {0}",
     "prompt-challenge":"Challenge Status",
     "prompt-incoming-challenge":"A NEW CHALLENGER",
-    "prompt-incoming-challenge-canceled":"Challenge Canceled"
+    "prompt-incoming-challenge-canceled":"Challenge Canceled",
+    "channel-test-play":"Play Locally"
 }

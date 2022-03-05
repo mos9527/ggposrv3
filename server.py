@@ -5,9 +5,7 @@ if not hasattr(time, 'time_ns'): # for Py3.6
     time.time_ns = lambda: int(time.time() * 1e9)
 
 from argparse import ArgumentParser
-import logging
-from os import path
-import socket
+import logging,socket
 
 from pywebhost.handler import Request
 from pywebhost.modules import JSONMessageWrapper, WriteContentToRequest
@@ -41,6 +39,7 @@ def get_ip():
 if __name__ == '__main__':
     argparse = ArgumentParser(description='GGPO Python3 Server')
     argparse.add_argument('--port',help='HTTP/TCP/UDP port',default=7000,type=int)    
+    argparse.add_argument('--no-interactive',help='Do not take interactive input from stdin.',default=False,action='store_true')
     args = argparse.parse_args()
     
     server = GGPOServer()
@@ -133,8 +132,11 @@ if __name__ == '__main__':
     logging.info('          udp://%s:%d' % (get_ip(),args.port))    
     udp_handler = GGPOGenericSTUNServer(server=server,port=args.port)
     udp_handler.start()
-    tServer = Thread(target=server.serve_forever,name="GGPOTCP",daemon=True)
-    tServer.start()
-    # The main thread spawns an interactive terminal for more administrative operations
-    from code import interact
-    interact(banner='* Console is now ready (Press Ctrl+D to exit).',local=locals())
+    serverThread = Thread(target=server.serve_forever,name="GGPOTCP",daemon=True)    
+    serverThread.start()
+    if not args.no_interactive:
+        # The main thread spawns an interactive terminal for more administrative operations        
+        from code import interact
+        interact(banner='* Console is now ready (Press Ctrl+D to exit).',local=locals())
+    else:        
+        serverThread.join()

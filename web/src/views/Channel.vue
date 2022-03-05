@@ -1,9 +1,8 @@
 <template>
   <v-container class="pa-8" flex style="overflow: hidden">
-    <!-- User list -->
     <h1 class="mb-5" style="overflow: hidden;" :key="challengeUpdateKey">
       {{ getChannelObject(this.name).desc }}
-      <small style="opacity:0.5">{{ getChannelObject(this.name).rom }}</small>  
+      <v-btn v-if="getChannelObject(this.name).rom" color="primary" style="opacity:0.5;float:right">{{$t("channel-test-play")}}<v-icon>mdi-play</v-icon>{{getChannelObject(this.name).rom}}</v-btn>  
     </h1>
     <v-slide-group multiple show-arrows class="pa-2">
       <v-slide-item v-for="user in channel_users" :key="user.name">
@@ -132,10 +131,9 @@
 
     <v-container style="position:fixed;bottom:72px">
       <v-textarea
-        :placeholder="$t('chat-channel-message') + ' [Ctrl+Enter]' "
+        :placeholder="$t('chat-channel-message') + ' [Enter]' "
         v-model="message"
-        v-on:keypress.ctrl.enter="send()"
-        style="background-color:rgba(255,255,255,0.5)"
+        v-on:keypress.enter="send()"
         rows="1"
       ></v-textarea>      
     </v-container>

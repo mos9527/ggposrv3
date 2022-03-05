@@ -232,6 +232,7 @@ class GGPOPlayerSession(WebsocketSession):
         '''
         self.send_ack(sequence)
         self.server.players.append(self)
+        self.send_sysmessage('Press T to chat')
 
     def handle_ingame_privmsg(self, quark, msg, sequence):
         """
