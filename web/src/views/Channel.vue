@@ -2,7 +2,10 @@
   <v-container class="pa-8" flex style="overflow: hidden">
     <h1 class="mb-5" style="overflow: hidden;" :key="challengeUpdateKey">
       {{ getChannelObject(this.name).desc }}
-      <v-btn v-if="getChannelObject(this.name).rom" color="primary" style="opacity:0.5;float:right">{{$t("channel-test-play")}}<v-icon>mdi-play</v-icon>{{getChannelObject(this.name).rom}}</v-btn>  
+      <v-btn v-if="getChannelObject(this.name).rom" color="primary" style="opacity:0.5;float:right"
+      v-on:click="localPlay">
+        {{$t("channel-test-play")}}<v-icon>mdi-play</v-icon>{{getChannelObject(this.name).rom}}
+      </v-btn>  
     </h1>
     <v-slide-group multiple show-arrows class="pa-2">
       <v-slide-item v-for="user in channel_users" :key="user.name">
@@ -113,7 +116,7 @@
             :to="'/challenge?challenging=' + selectedUser"
             :disabled="channel_current=='lobby'"
           >
-            {{ channel_current=='lobby' ?  '大厅内无法挑战' : '挑战' }}
+            {{ channel_current=='lobby' ?  'N/A' : 'GO' }}
           </v-btn>
           <v-btn
             style="width: 50%"
@@ -163,6 +166,7 @@ export default {
       //   ts: 0,
       // },
     ],
+    localQuark:'',
     badgeColor:{'PLAYING':'red','AVAILABLE':'green','AWAY':'grey','SPECTATING':'blue'},
     challenge_available : {},
     challengeUpdateKey:0,
@@ -185,8 +189,13 @@ export default {
   methods: {    
     getChannelObject(channel){
       for (var chn of this.channels)
-        if (chn.name==channel) return chn      
+        if (chn.name==channel) {          
+          return chn                
+        }
     },
+    localPlay(){
+      window.open(`moscade://match,${this.getChannelObject(this.name).rom},${document.location.host}${document.location.pathname}@local/`)
+    },    
     showError(message) {
       this.errorMessage = message;
       this.showErrorDialog = true;
